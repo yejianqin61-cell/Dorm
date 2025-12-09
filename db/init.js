@@ -7,11 +7,31 @@ const path = require('path');
 const sqlFile = path.join(__dirname, 'init.sql');
 const sql = fs.readFileSync(sqlFile, 'utf8');
 
-// 分割 SQL 语句（按分号分割，过滤空语句）
+// 分割 SQL 语句（按分号分割，过滤空语句和注释）
 const statements = sql
   .split(';')
   .map(s => s.trim())
-  .filter(s => s.length > 0 && !s.startsWith('--'));
+  .filter(s => {
+    // 过滤空语句和纯注释行
+    if (s.length === 0) return false;
+    // 移除行内注释（-- 后面的内容）
+    const lines = s.split('\n').map(line => {
+      const commentIndex = line.indexOf('--');
+      return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line.trim();
+    });
+    const cleaned = lines.filter(l => l.length > 0).join(' ');
+    return cleaned.length > 0;
+  })
+  .map(s => {
+    // 移除行内注释
+    const lines = s.split('\n').map(line => {
+      const commentIndex = line.indexOf('--');
+      return commentIndex >= 0 ? line.substring(0, commentIndex).trim() : line.trim();
+    });
+    return lines.filter(l => l.length > 0).join(' ');
+  });
+
+console.log(`Found ${statements.length} SQL statements to execute`);
 
 // 执行每个 SQL 语句（顺序执行，确保外键依赖正确）
 let executed = 0;
@@ -19,6 +39,7 @@ const executeStatements = async () => {
   for (let index = 0; index < statements.length; index++) {
     const statement = statements[index];
     if (statement) {
+      console.log(`Executing statement ${index + 1}: ${statement.substring(0, 50)}...`);
       await new Promise((resolve) => {
         db.query(statement + ';', (err, results) => {
           if (err) {
@@ -29,11 +50,14 @@ const executeStatements = async () => {
               console.log(`Table already exists, skipping statement ${index + 1}...`);
             } else {
               console.error(`Error executing statement ${index + 1}:`, err.message);
-              console.error(`Statement was:`, statement.substring(0, 100));
+              console.error(`Statement was:`, statement.substring(0, 200));
             }
           } else {
             executed++;
             console.log(`Statement ${index + 1} executed successfully`);
+            if (results && results.affectedRows !== undefined) {
+              console.log(`  Affected rows: ${results.affectedRows}`);
+            }
           }
           resolve();
         });
