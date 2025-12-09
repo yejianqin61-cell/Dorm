@@ -38,9 +38,11 @@ const executeStatements = async () => {
           resolve();
         });
       });
-      // 等待一下，确保表创建完成（CREATE TABLE 需要更长时间）
+      // 等待一下，确保表创建完成
       if (statement.toUpperCase().includes('CREATE TABLE')) {
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise(resolve => setTimeout(resolve, 1000)); // CREATE TABLE 后等待1秒
+      } else if (statement.toUpperCase().includes('ALTER TABLE') && statement.toUpperCase().includes('FOREIGN KEY')) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // 添加外键前等待0.5秒
       } else {
         await new Promise(resolve => setTimeout(resolve, 100));
       }
