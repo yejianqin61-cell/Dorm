@@ -38,8 +38,12 @@ const executeStatements = async () => {
           resolve();
         });
       });
-      // 等待一下，确保表创建完成
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // 等待一下，确保表创建完成（CREATE TABLE 需要更长时间）
+      if (statement.toUpperCase().includes('CREATE TABLE')) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
   }
 };
