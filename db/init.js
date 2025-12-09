@@ -22,11 +22,14 @@ const executeStatements = async () => {
       await new Promise((resolve) => {
         db.query(statement + ';', (err, results) => {
           if (err) {
-            // 如果表已存在，忽略错误
-            if (err.code === 'ER_TABLE_EXISTS_ERROR' || err.code === 'ER_DUP_KEYNAME') {
+            // 如果是 DROP TABLE 且表不存在，忽略错误
+            if (statement.toUpperCase().includes('DROP TABLE') && err.code === 'ER_BAD_TABLE_ERROR') {
+              console.log(`Table does not exist, skipping DROP statement ${index + 1}...`);
+            } else if (err.code === 'ER_TABLE_EXISTS_ERROR' || err.code === 'ER_DUP_KEYNAME') {
               console.log(`Table already exists, skipping statement ${index + 1}...`);
             } else {
               console.error(`Error executing statement ${index + 1}:`, err.message);
+              console.error(`Statement was:`, statement.substring(0, 100));
             }
           } else {
             executed++;
