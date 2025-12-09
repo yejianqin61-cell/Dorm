@@ -76,6 +76,27 @@ const executeStatements = async () => {
 
 executeStatements().then(() => {
   console.log(`Database initialization completed. ${executed} statements executed.`);
+  
+  // 验证表是否创建成功
+  db.query('SELECT DATABASE() as current_db', (err, results) => {
+    if (err) {
+      console.error('Error checking database:', err.message);
+    } else {
+      console.log(`Current database: ${results[0]?.current_db || 'unknown'}`);
+    }
+  });
+  
+  db.query("SHOW TABLES LIKE 'ev_%'", (err, results) => {
+    if (err) {
+      console.error('Error checking tables:', err.message);
+    } else {
+      console.log(`Found ${results.length} tables with prefix 'ev_':`);
+      results.forEach(row => {
+        const tableName = Object.values(row)[0];
+        console.log(`  - ${tableName}`);
+      });
+    }
+  });
 });
 
 // 这个日志会在异步执行前打印，所以是正常的
