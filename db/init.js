@@ -45,5 +45,5 @@ executeStatements().then(() => {
   console.log(`Database initialization completed. ${executed} statements executed.`);
 });
 
-console.log('Database initialization completed');
+// 这个日志会在异步执行前打印，所以是正常的
 
