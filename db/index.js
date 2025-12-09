@@ -31,6 +31,15 @@ if (process.env.MYSQL_URL) {
   };
 }
 
+// 调试：打印使用的数据库配置（不打印密码）
+console.log('Database config:', {
+  host: dbConfig.host,
+  port: dbConfig.port,
+  user: dbConfig.user,
+  database: dbConfig.database,
+  usingMYSQL_URL: !!process.env.MYSQL_URL
+});
+
 const db = mysql.createPool(dbConfig);
 
 module.exports = db;
