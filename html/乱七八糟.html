@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <style>
+            body {
+                transition: background 0.5s;
+                height: 100vh;
+                margin: 0;
+            }
+
+            button {
+                padding: 15px 30px;
+                font-size: 18px;
+                margin: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <button onclick="changeColor('lightcoral')">🔴 浪漫粉</button>
+        <button onclick="changeColor('lightseagreen')">🟢 清新绿</button>
+        <button onclick="changeColor('gold')">🟡 土豪金</button>
+        <button onclick="randomColor()">🎲 随机色</button>
+
+        <script>
+            function changeColor(color) {
+                document.body.style.backgroundColor = color;
+            }
+
+            function randomColor() {
+                const colors = ['#FFB6C1', '#87CEFA', '#98FB98', '#DDA0DD', '#FFD700'];
+                const random = colors[Math.floor(Math.random() * colors.length)];
+                document.body.style.backgroundColor = random;
+            }
+        </script>
+    </body>
+
+    </html>
+
+    <div style="padding: 20px;">
+        <h3>📝 说说你现在的心情（最多50字）</h3>
+        <textarea id="myText" rows="4" cols="50" placeholder="输入文字..." oninput="updateCount()"></textarea>
+        <p>字数：<span id="count">0</span>/50</p>
+        <p id="warning" style="color: red;"></p>
+    </div>
+
+    <script>
+        function updateCount() {
+            const text = document.getElementById('myText').value;
+            const count = text.length;
+            document.getElementById('count').textContent = count;
+
+            const warning = document.getElementById('warning');
+            if (count > 50) {
+                warning.textContent = '❌ 超过字数限制啦！';
+            } else {
+                warning.textContent = '';
+            }
+        }
+    </script>
+    <div style="text-align: center; padding: 30px;">
+        <h2>🎁 yjq的幸运抽奖</h2>
+        <div id="result" style="font-size: 24px; margin: 20px; color: #e74c3c;"></div>
+        <button onclick="startLottery()" style="padding: 12px 24px;">开始抽奖</button>
+    </div>
+
+    <script>
+        function startLottery() {
+            const prizes = ['🎮 游戏键盘', '📚 技术书籍', '☕ 奶茶一杯', '💻 编程课程', '😴 谢谢参与'];
+            const result = document.getElementById('result');
+
+            // 模拟抽奖动画效果
+            let count = 0;
+            const interval = setInterval(() => {
+                result.textContent = prizes[count % prizes.length];
+                count++;
+            }, 100);
+
+            // 3秒后停止
+            setTimeout(() => {
+                clearInterval(interval);
+                const finalPrize = prizes[Math.floor(Math.random() * prizes.length)];
+                result.textContent = `恭喜获得：${finalPrize}`;
+                result.style.color = '#27ae60';
+            }, 3000);
+        }
+    </script>
+    <div style="text-align: center; padding: 20px;">
+        <h3>⏰ 实时时钟</h3>
+        <div id="clock" style="font-size: 32px; font-family: 'Courier New'; 
+                          background: #2c3e50; color: white; padding: 20px; 
+                          border-radius: 10px; display: inline-block;">
+        </div>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const time = now.toLocaleTimeString();
+            document.getElementById('clock').textContent = time;
+        }
+
+        // 每秒更新一次
+        setInterval(updateClock, 1000);
+        updateClock(); // 立即显示
+    </script>
+    <style>
+        .image-gallery {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .gallery-img {
+            width: 150px;
+            height: 150px;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-img:hover {
+            transform: scale(1.2);
+        }
+    </style>
+
+    <div class="image-gallery">
+        <img src="https://via.placeholder.com/150/FF6B6B/white?text=HTML" class="gallery-img" alt="HTML">
+        <img src="https://via.placeholder.com/150/4ECDC4/white?text=CSS" class="gallery-img" alt="CSS">
+        <img src="https://via.placeholder.com/150/45B7D1/white?text=JS" class="gallery-img" alt="JavaScript">
+    </div>
+    <!DOCTYPE html>
+    <html>
+
+    <head>
+        <style>
+            .pixel {
+                width: 20px;
+                height: 20px;
+                border: 1px solid #ccc;
+                display: inline-block;
+                margin: 1px;
+                cursor: pointer;
+            }
+
+            .pixel:hover {
+                border: 1px solid #666;
+            }
+
+            #palette {
+                margin: 10px 0;
+            }
+
+            .color-option {
+                width: 30px;
+                height: 30px;
+                display: inline-block;
+                margin: 5px;
+                cursor: pointer;
+                border: 2px solid transparent;
+            }
+
+            .color-option.selected {
+                border: 2px solid #000;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h3>🎨 yjq的像素画板</h3>
+        <div id="palette">
+            <div class="color-option selected" style="background:red;" onclick="selectColor('red')"></div>
+            <div class="color-option" style="background:blue;" onclick="selectColor('blue')"></div>
+            <div class="color-option" style="background:green;" onclick="selectColor('green')"></div>
+            <div class="color-option" style="background:yellow;" onclick="selectColor('yellow')"></div>
+            <div class="color-option" style="background:purple;" onclick="selectColor('purple')"></div>
+        </div>
+        <button onclick="clearCanvas()">清空画板</button>
+        <div id="canvas" style="margin-top: 10px;"></div>
+
+        <script>
+            let currentColor = 'red';
+
+            // 创建画板
+            for (let i = 0; i < 400; i++) {
+                const pixel = document.createElement('div');
+                pixel.className = 'pixel';
+                pixel.onclick = function () {
+                    this.style.backgroundColor = currentColor;
+                };
+                document.getElementById('canvas').appendChild(pixel);
+            }
+
+            function selectColor(color) {
+                currentColor = color;
+                document.querySelectorAll('.color-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                event.target.classList.add('selected');
+            }
+
+            function clearCanvas() {
+                document.querySelectorAll('.pixel').forEach(pixel => {
+                    pixel.style.backgroundColor = '';
+                });
+            }
+        </script>
+    </body>
+    <div style="max-width: 400px; margin: 20px;">
+        <h3>✅ yjq的待办清单</h3>
+        <input type="text" id="todoInput" placeholder="输入新任务..." style="width: 70%; padding: 8px;">
+        <button onclick="addTodo()" style="padding: 8px 15px;">添加</button>
+
+        <ul id="todoList" style="list-style: none; padding: 0; margin-top: 15px;"></ul>
+
+        <p>完成: <span id="completedCount">0</span>/<span id="totalCount">0</span></p>
+    </div>
+
+    <script>
+        let todos = [];
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+
+            if (text) {
+                todos.push({ text, completed: false });
+                input.value = '';
+                renderTodos();
+            }
+        }
+
+        function toggleTodo(index) {
+            todos[index].completed = !todos[index].completed;
+            renderTodos();
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            renderTodos();
+        }
+
+        function renderTodos() {
+            const list = document.getElementById('todoList');
+            list.innerHTML = '';
+
+            todos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.style.padding = '8px';
+                li.style.borderBottom = '1px solid #eee';
+                li.style.display = 'flex';
+                li.style.justifyContent = 'space-between';
+                li.style.alignItems = 'center';
+
+                li.innerHTML = `
+                <span style="text-decoration: ${todo.completed ? 'line-through' : 'none'}; 
+                            color: ${todo.completed ? '#999' : '#000'};"
+                      onclick="toggleTodo(${index})">
+                    ${todo.text}
+                </span>
+                <button onclick="deleteTodo(${index})" style="color: red; border: none; background: none;">🗑️</button>
+            `;
+
+                list.appendChild(li);
+            });
+
+            // 更新统计
+            const completed = todos.filter(todo => todo.completed).length;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = todos.length;
+        }
+
+        // 回车添加任务
+        document.getElementById('todoInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addTodo();
+        });
+    </script>
+    <div style="text-align: center; padding: 20px;">
+        <h3>🐹 打地鼠游戏</h3>
+        <p>得分: <span id="score">0</span> | 时间: <span id="time">30</span>秒</p>
+
+        <div id="gameBoard" style="display: grid; grid-template-columns: repeat(3, 100px); 
+                              gap: 10px; justify-content: center; margin: 20px;">
+            <div class="hole" onclick="whack(0)"></div>
+            <div class="hole" onclick="whack(1)"></div>
+            <div class="hole" onclick="whack(2)"></div>
+            <div class="hole" onclick="whack(3)"></div>
+            <div class="hole" onclick="whack(4)"></div>
+            <div class="hole" onclick="whack(5)"></div>
+        </div>
+
+        <button onclick="startGame()" id="startBtn">开始游戏</button>
+    </div>
+
+    <style>
+        .hole {
+            width: 100px;
+            height: 100px;
+            background: #8B4513;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .mole {
+            width: 80px;
+            height: 80px;
+            background: #654321;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -80px;
+            left: 10px;
+            transition: bottom 0.3s;
+        }
+
+        .mole.active {
+            bottom: 10px;
+        }
+    </style>
+
+    <script>
+        let score = 0;
+        let timeLeft = 30;
+        let gameInterval;
+        let moleInterval;
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            document.getElementById('score').textContent = score;
+            document.getElementById('time').textContent = timeLeft;
+            document.getElementById('startBtn').disabled = true;
+
+            // 地鼠随机出现
+            moleInterval = setInterval(() => {
+                const holes = document.querySelectorAll('.hole');
+                holes.forEach(hole => {
+                    hole.innerHTML = '';
+                    hole.classList.remove('active');
+                });
+
+                const randomHole = Math.floor(Math.random() * 6);
+                const mole = document.createElement('div');
+                mole.className = 'mole active';
+                holes[randomHole].appendChild(mole);
+
+                setTimeout(() => {
+                    mole.remove();
+                }, 800);
+            }, 1000);
+
+            // 倒计时
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('time').textContent = timeLeft;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function whack(holeIndex) {
+            const hole = document.querySelectorAll('.hole')[holeIndex];
+            if (hole.querySelector('.mole')) {
+                score++;
+                document.getElementById('score').textContent = score;
+                hole.querySelector('.mole').remove();
+            }
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            clearInterval(moleInterval);
+            document.getElementById('startBtn').disabled = false;
+            alert(`游戏结束！你的得分: ${score}`);
+
+            // 清除所有地鼠
+            document.querySelectorAll('.mole').forEach(mole => mole.remove());
+        }
+    </script>
+    <div style="text-align: center; padding: 40px;">
+        <h1 id="rainbowText">JavaScript魔法</h1>
+    </div>
+
+    <script>
+        function updateRainbow() {
+            const text = document.getElementById('rainbowText');
+            const now = new Date();
+            const hue = (now.getTime() / 20) % 360;
+
+            text.style.background = `linear-gradient(45deg, 
+            hsl(${hue}deg, 100%, 50%), 
+            hsl(${(hue + 60) % 360}deg, 100%, 50%), 
+            hsl(${(hue + 120) % 360}deg, 100%, 50%))`;
+            text.style.backgroundClip = 'text';
+            text.style.webkitBackgroundClip = 'text';
+            text.style.color = 'transparent';
+            text.style.fontSize = '2.5em';
+            text.style.fontWeight = 'bold';
+
+            requestAnimationFrame(updateRainbow);
+        }
+
+        updateRainbow();
+    </script>
+    <div style="text-align: center; padding: 20px;">
+        <h3>🔢 数字华容道</h3>
+        <div id="puzzle" style="display: inline-grid; grid-template-columns: repeat(4, 60px); 
+                           gap: 2px; background: #333; padding: 5px; border-radius: 5px;">
+        </div>
+        <p id="message" style="height: 20px; color: green;"></p>
+    </div>
+
+    <script>
+        let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+        let emptyIndex = 15;
+
+        function initPuzzle() {
+            // 打乱数字（确保有解）
+            do {
+                numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                emptyIndex = numbers.indexOf(0);
+            } while (!isSolvable());
+
+            renderPuzzle();
+        }
+
+        function isSolvable() {
+            // 检查是否可解的逻辑
+            return true; // 简化版
+        }
+
+        function renderPuzzle() {
+            const puzzle = document.getElementById('puzzle');
+            puzzle.innerHTML = '';
+
+            numbers.forEach((num, index) => {
+                const tile = document.createElement('div');
+                tile.style.width = '60px';
+                tile.style.height = '60px';
+                tile.style.background = num === 0 ? 'transparent' : '#3498db';
+                tile.style.color = 'white';
+                tile.style.display = 'flex';
+                tile.style.alignItems = 'center';
+                tile.style.justifyContent = 'center';
+                tile.style.fontSize = '20px';
+                tile.style.cursor = num === 0 ? 'default' : 'pointer';
+                tile.style.borderRadius = '3px';
+                tile.textContent = num === 0 ? '' : num;
+
+                if (num !== 0) {
+                    tile.onclick = () => moveTile(index);
+                }
+
+                puzzle.appendChild(tile);
+            });
+
+            checkWin();
+        }
+
+        function moveTile(clickedIndex) {
+            // 检查是否与空位相邻
+            const adjacent = [
+                emptyIndex - 1, emptyIndex + 1, // 左右
+                emptyIndex - 4, emptyIndex + 4  // 上下
+            ];
+
+            if (adjacent.includes(clickedIndex)) {
+                // 交换位置
+                [numbers[emptyIndex], numbers[clickedIndex]] =
+                    [numbers[clickedIndex], numbers[emptyIndex]];
+                emptyIndex = clickedIndex;
+                renderPuzzle();
+            }
+        }
+
+        function checkWin() {
+            const winState = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+            if (numbers.join(',') === winState.join(',')) {
+                document.getElementById('message').textContent = '🎉 恭喜你赢了！';
+            } else {
+                document.getElementById('message').textContent = '';
+            }
+        }
+
+        // 初始化游戏
+        initPuzzle();
+    </script>
+
+    </html>
+    <!-- 轮播图区域：放在功能卡片下方 -->
+    <div id="carousel-container">
+        <div class="carousel-slide">
+            <img src="hero.jpg" alt="图片1">
+            <img src="landiao.jpg" alt="图片2">
+            <img src="rainbow.jpg" alt="图片3">
+        </div>
+        <div class="carousel-nav">
+            <span class="prev">&#10094;</span>
+            <span class="next">&#10095;</span>
+        </div>
+        <div class="carousel-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <p>© 2026 XMUM Dorm 厦马小筑 - Xiamen University Malaysia Campus Community</p>
+            <p>Designed for XMUMers, by yjq</p>
+        </div>
+    </footer>
+    </div>
+
+    <!-- 轮播图逻辑 -->
+    <script>
+        const slides = document.querySelectorAll('.carousel-slide img');
+        const dots = document.querySelectorAll('.dot');
+        let index = 0;
+
+        function showSlide(i) {
+            const slideWidth = slides[0].clientWidth;
+            document.querySelector('.carousel-slide').style.transform = `translateX(${-i * slideWidth}px)`;
+            dots.forEach(dot => dot.classList.remove('active'));
+            dots[i].classList.add('active');
+        }
+
+        let interval = setInterval(() => {
+            index = (index + 1) % slides.length;
+            showSlide(index);
+        }, 3000);
+
+        document.querySelector('.prev').addEventListener('click', () => {
+            index = (index - 1 + slides.length) % slides.length;
+            showSlide(index);
+            resetInterval();
+        });
+
+        document.querySelector('.next').addEventListener('click', () => {
+            index = (index + 1) % slides.length;
+            showSlide(index);
+            resetInterval();
+        });
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => {
+                index = i;
+                showSlide(index);
+                resetInterval();
+            });
+        });
+
+        function resetInterval() {
+            clearInterval(interval);
+            interval = setInterval(() => {
+                index = (index + 1) % slides.length;
+                showSlide(index);
+            }, 3000);
+        }
+    </script>
+
+</body>
+
+</html>

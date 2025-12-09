@@ -1,0 +1,178 @@
+const db = require('../db/index.js');
+
+// 创建动态
+exports.createPost = (req, res) => {
+  const { content, image_url } = req.body;
+  const sql = 'insert into ev_posts (user_id, content, image_url) values (?, ?, ?)';
+  db.query(sql, [req.user.id, content, image_url || null], (err, results) => {
+    if (err) return res.cc(err);
+    if (results.affectedRows !== 1) return res.cc('发布失败，请稍后重试');
+    res.send({ status: 0, message: '发布成功' });
+  });
+};
+
+// 获取动态列表
+exports.listPosts = (req, res) => {
+  const pageSize = Number(req.query.limit) || 20;
+  const offset = Number(req.query.offset) || 0;
+
+  const sql = `
+    SELECT
+      p.id,
+      p.user_id,
+      p.content,
+      p.image_url,
+      p.created_at,
+      u.nickname,
+      u.student_id,
+      u.picture AS user_picture,
+      (SELECT COUNT(*) FROM ev_post_likes l WHERE l.post_id = p.id) AS like_count,
+      (SELECT COUNT(*) FROM ev_post_comments c WHERE c.post_id = p.id) AS comment_count
+    FROM ev_posts p
+    LEFT JOIN ev_users u ON p.user_id = u.id
+    ORDER BY p.created_at DESC
+    LIMIT ? OFFSET ?;
+  `;
+
+  db.query(sql, [pageSize, offset], (err, posts) => {
+    if (err) return res.cc(err);
+    res.send({
+      status: 0,
+      message: '获取动态成功',
+      data: posts
+    });
+  });
+};
+
+// 获取我的动态列表
+exports.listMyPosts = (req, res) => {
+  const userId = req.user.id;
+  const sql = `
+    SELECT
+      p.id,
+      p.user_id,
+      p.content,
+      p.image_url,
+      p.created_at,
+      u.nickname,
+      u.student_id,
+      u.picture AS user_picture,
+      (SELECT COUNT(*) FROM ev_post_likes l WHERE l.post_id = p.id) AS like_count,
+      (SELECT COUNT(*) FROM ev_post_comments c WHERE c.post_id = p.id) AS comment_count
+    FROM ev_posts p
+    LEFT JOIN ev_users u ON p.user_id = u.id
+    WHERE p.user_id = ?
+    ORDER BY p.created_at DESC;
+  `;
+  db.query(sql, [userId], (err, posts) => {
+    if (err) return res.cc(err);
+    res.send({ status: 0, message: '获取我的动态成功', data: posts });
+  });
+};
+
+// 删除动态（仅作者）
+exports.deletePost = (req, res) => {
+  const postId = req.params.id;
+  const userId = req.user.id;
+
+  const checkSql = 'select user_id from ev_posts where id=?';
+  db.query(checkSql, [postId], (err, rows) => {
+    if (err) return res.cc(err);
+    if (!rows.length) return res.cc('帖子不存在');
+    if (rows[0].user_id !== userId) return res.cc('只能删除自己的帖子');
+
+    const delLikes = 'delete from ev_post_likes where post_id=?';
+    const delComments = 'delete from ev_post_comments where post_id=?';
+    const delPost = 'delete from ev_posts where id=?';
+
+    db.query(delLikes, [postId], (e1) => {
+      if (e1) return res.cc(e1);
+      db.query(delComments, [postId], (e2) => {
+        if (e2) return res.cc(e2);
+        db.query(delPost, [postId], (e3, result) => {
+          if (e3) return res.cc(e3);
+          if (result.affectedRows !== 1) return res.cc('删除失败');
+          res.send({ status: 0, message: '删除成功' });
+        });
+      });
+    });
+  });
+};
+
+// 点赞/取消点赞（切换）
+exports.toggleLike = (req, res) => {
+  const postId = req.params.id;
+  const userId = req.user.id;
+
+  const checkSql = 'select id from ev_post_likes where post_id=? and user_id=?';
+  db.query(checkSql, [postId, userId], (err, results) => {
+    if (err) return res.cc(err);
+
+    const hasLiked = results.length > 0;
+    const sql = hasLiked
+      ? 'delete from ev_post_likes where post_id=? and user_id=?'
+      : 'insert into ev_post_likes (post_id, user_id) values (?, ?)';
+
+    db.query(sql, [postId, userId], (err2) => {
+      if (err2) return res.cc(err2);
+
+      const countSql = 'select count(*) as cnt from ev_post_likes where post_id=?';
+      db.query(countSql, [postId], (err3, countRows) => {
+        if (err3) return res.cc(err3);
+        res.send({
+          status: 0,
+          message: hasLiked ? '已取消点赞' : '点赞成功',
+          data: {
+            like_count: countRows[0].cnt,
+            liked: !hasLiked
+          }
+        });
+      });
+    });
+  });
+};
+
+// 发表评论
+exports.createComment = (req, res) => {
+  const postId = req.params.id;
+  const userId = req.user.id;
+  const { content } = req.body;
+
+  const sql = 'insert into ev_post_comments (post_id, user_id, content) values (?, ?, ?)';
+  db.query(sql, [postId, userId, content], (err, results) => {
+    if (err) return res.cc(err);
+    if (results.affectedRows !== 1) return res.cc('评论失败，请稍后重试');
+
+    res.send({
+      status: 0,
+      message: '评论成功'
+    });
+  });
+};
+
+// 获取单条动态的评论列表（简化版）
+exports.listComments = (req, res) => {
+  const postId = req.params.id;
+  const sql = `
+    SELECT
+      c.id,
+      c.content,
+      c.created_at,
+      u.nickname,
+      u.picture AS user_picture
+    FROM ev_post_comments c
+    LEFT JOIN ev_users u ON c.user_id = u.id
+    WHERE c.post_id=?
+    ORDER BY c.created_at DESC
+    LIMIT 50;
+  `;
+  db.query(sql, [postId], (err, results) => {
+    if (err) return res.cc(err);
+    res.send({
+      status: 0,
+      message: '获取评论成功',
+      data: results
+    });
+  });
+};
+

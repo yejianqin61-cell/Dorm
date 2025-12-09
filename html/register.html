@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMUM Nook - Register</title>
+    <script src="./config.js"></script>
+    <script src="./auth.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('图片动漫化.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .navbar {
+            background-color: white;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #1a5fb4;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            background-color: #1a5fb4;
+            color: white;
+        }
+
+        .register-card {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 80px;
+        }
+
+        .register-header {
+            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .register-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .register-header p {
+            opacity: 0.9;
+        }
+
+        .register-form {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #1a5fb4;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: #1a5fb4;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(26, 95, 180, 0.1);
+        }
+
+        .form-hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .password-strength {
+            height: 5px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+        }
+
+        .strength-weak {
+            background-color: #ff4757;
+        }
+
+        .strength-medium {
+            background-color: #ffa502;
+        }
+
+        .strength-strong {
+            background-color: #2ed573;
+        }
+
+        .error-message {
+            color: #ff4757;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .register-button {
+            background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .register-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(26, 95, 180, 0.3);
+        }
+
+        .register-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .login-link a {
+            color: #1a5fb4;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        footer {
+            background-color: rgba(26, 26, 26, 0.8);
+            color: #aaa;
+            text-align: center;
+            padding: 20px 0;
+            position: relative;
+            z-index: 1;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 15px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            .register-card {
+                margin-top: 120px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-container"></div>
+
+    <div class="content-wrapper">
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">XMUM Dorm 厦马小筑</div>
+                <div class="nav-links">
+                    <a href="main page.html" class="nav-link">Home</a>
+                    <a href="myprofile.html" class="nav-link">My Profile</a>
+                    <a href="create_post.html" class="nav-link">Create Post</a>
+                    <a href="safari.html" class="nav-link">Explore</a>
+                </div>
+            </div>
+        </nav>
+
+        <div class="register-card">
+            <div class="register-header">
+                <h1>Join XMUM Dorm!</h1>
+                <p>Create your account to connect with campus community</p>
+            </div>
+
+            <form class="register-form" id="registerForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentId">Student ID</label>
+                        <input type="text" id="studentId" class="form-control" placeholder="For example: CST2509666"
+                            required>
+                        <div class="error-message" id="studentIdError">Please enter your student ID</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" class="form-control" placeholder="example@student.xmu.edu.my"
+                            required>
+                        <div class="error-message" id="emailError">Please enter a valid email address</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" class="form-control" placeholder="6-16 characters" required
+                        minlength="6" maxlength="16">
+                    <div class="password-strength">
+                        <div class="strength-bar" id="strengthBar"></div>
+                    </div>
+                    <div class="form-hint">Password must be 6-16 characters</div>
+                    <div class="error-message" id="passwordError">Password must be 6-16 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <input type="password" id="confirmPassword" class="form-control"
+                        placeholder="Re-enter your password" required minlength="6" maxlength="16">
+                    <div class="error-message" id="confirmPasswordError">Passwords do not match</div>
+                </div>
+
+                <button type="submit" class="register-button" id="registerButton">Create Account</button>
+
+                <div class="login-link">
+                    <p>Already have an account? <a href="log in.html">Log In</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 XMUM Dorm 厦马小筑 - Xiamen University Malaysia Campus Community</p>
+            <p>Designed for XMUMers, by yjq</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('registerForm');
+            const studentIdInput = document.getElementById('studentId');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            const strengthBar = document.getElementById('strengthBar');
+            const registerButton = document.getElementById('registerButton');
+
+            // 错误消息元素
+            const studentIdError = document.getElementById('studentIdError');
+            const emailError = document.getElementById('emailError');
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+
+            // 验证邮箱格式
+            function validateEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
+            // 检查密码强度
+            function checkPasswordStrength(password) {
+                let strength = 0;
+
+                if (password.length >= 8) strength += 1;
+                if (/[A-Z]/.test(password)) strength += 1;
+                if (/[0-9]/.test(password)) strength += 1;
+                if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+                return strength;
+            }
+
+            // 更新密码强度条
+            function updateStrengthBar(password) {
+                const strength = checkPasswordStrength(password);
+                strengthBar.className = 'strength-bar';
+
+                if (password.length === 0) {
+                    strengthBar.style.width = '0%';
+                } else if (password.length < 6) {
+                    strengthBar.style.width = '33%';
+                    strengthBar.classList.add('strength-weak');
+                } else if (strength <= 2) {
+                    strengthBar.style.width = '66%';
+                    strengthBar.classList.add('strength-medium');
+                } else {
+                    strengthBar.style.width = '100%';
+                    strengthBar.classList.add('strength-strong');
+                }
+            }
+
+            // 显示错误消息
+            function showError(element, message) {
+                element.textContent = message;
+                element.style.display = 'block';
+            }
+
+            // 隐藏错误消息
+            function hideError(element) {
+                element.style.display = 'none';
+            }
+
+            // 验证表单
+            function validateForm() {
+                let isValid = true;
+
+                // 验证学号（只检查是否为空）
+                if (!studentIdInput.value.trim()) {
+                    showError(studentIdError, 'Please enter your student ID');
+                    isValid = false;
+                } else {
+                    hideError(studentIdError);
+                }
+
+                // 验证邮箱
+                if (!validateEmail(emailInput.value.trim())) {
+                    showError(emailError, 'Please enter a valid email address');
+                    isValid = false;
+                } else {
+                    hideError(emailError);
+                }
+
+                // 验证密码长度
+                if (passwordInput.value.length < 6 || passwordInput.value.length > 16) {
+                    showError(passwordError, 'Password must be 6-16 characters');
+                    isValid = false;
+                } else {
+                    hideError(passwordError);
+                }
+
+                // 验证确认密码
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    showError(confirmPasswordError, 'Passwords do not match');
+                    isValid = false;
+                } else {
+                    hideError(confirmPasswordError);
+                }
+
+                return isValid;
+            }
+
+            // 实时密码强度检查
+            passwordInput.addEventListener('input', function () {
+                updateStrengthBar(this.value);
+            });
+
+            // 提交表单处理
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                if (!validateForm()) {
+                    return;
+                }
+
+                // 禁用按钮防止重复提交
+                registerButton.disabled = true;
+                registerButton.textContent = 'Creating Account...';
+
+                try {
+                    // 准备发送给后端的数据
+                    const userData = {
+                        student_id: studentIdInput.value.trim(),
+                        email: emailInput.value.trim(),
+                        password: passwordInput.value
+                    };
+
+                    // 发送POST请求到后端API
+                    const response = await fetch(`${window.API_BASE_URL}/api/reguser`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(userData)
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // 注册成功
+                        alert('Registration successful! Please log in.');
+                        window.location.href = 'log in.html';
+                    } else {
+                        // 注册失败
+                        alert(`Registration failed: ${result.message || 'Unknown error'}`);
+                        registerButton.disabled = false;
+                        registerButton.textContent = 'Create Account';
+                    }
+                } catch (error) {
+                    // 网络错误
+                    console.error('Error:', error);
+                    alert('Network error. Please check your connection.');
+                    registerButton.disabled = false;
+                    registerButton.textContent = 'Create Account';
+                }
+            });
+
+            // 实时验证
+            studentIdInput.addEventListener('blur', function () {
+                if (!this.value.trim()) {
+                    showError(studentIdError, 'Please enter your student ID');
+                } else {
+                    hideError(studentIdError);
+                }
+            });
+
+            emailInput.addEventListener('blur', function () {
+                if (!validateEmail(this.value.trim())) {
+                    showError(emailError, 'Please enter a valid email address');
+                } else {
+                    hideError(emailError);
+                }
+            });
+
+            confirmPasswordInput.addEventListener('input', function () {
+                if (passwordInput.value !== this.value) {
+                    showError(confirmPasswordError, 'Passwords do not match');
+                } else {
+                    hideError(confirmPasswordError);
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

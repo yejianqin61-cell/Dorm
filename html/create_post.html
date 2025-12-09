@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Post - XMUM Dorm</title>
+  <script src="./config.js"></script>
+  <script src="./auth.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f7fa; margin: 0; padding: 0; }
+    .container { max-width: 720px; margin: 40px auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
+    h1 { margin-top: 0; color: #1a5fb4; }
+    .form-group { margin-bottom: 16px; }
+    label { font-weight: 600; color: #333; display: block; margin-bottom: 6px; }
+    textarea, input { width: 100%; padding: 12px; border: 1px solid #d9d9d9; border-radius: 8px; font-size: 15px; }
+    textarea { min-height: 140px; resize: vertical; }
+    .actions { display: flex; gap: 12px; align-items: center; }
+    .btn { padding: 12px 16px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; color: #fff; }
+    .btn-primary { background: #1a5fb4; }
+    .btn-secondary { background: #6c757d; }
+    .status { margin-top: 12px; font-size: 14px; color: #555; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Create Post</h1>
+    <div class="form-group">
+      <label for="contentInput">Content</label>
+      <textarea id="contentInput" placeholder="Share what’s happening around campus..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="imageInput">Image URL (optional)</label>
+      <input id="imageInput" type="url" placeholder="https://example.com/image.jpg" />
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="submitBtn">Publish</button>
+      <button class="btn btn-secondary" id="cancelBtn">Back</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const API_BASE = `${window.API_BASE_URL}/api`;
+
+    function ensureLogin() {
+      if (!window.auth || !window.auth.isLoggedIn()) {
+        alert('Please login first.');
+        window.location.href = 'log in.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function publish() {
+      if (!ensureLogin()) return;
+      const content = document.getElementById('contentInput').value.trim();
+      const image_url = document.getElementById('imageInput').value.trim();
+      const statusEl = document.getElementById('status');
+
+      if (!content) {
+        statusEl.textContent = 'Content cannot be empty.';
+        return;
+      }
+
+      statusEl.textContent = 'Publishing...';
+
+      try {
+        const res = await fetch(`${API_BASE}/posts`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: window.auth.getToken()
+          },
+          body: JSON.stringify({ content, image_url })
+        });
+        const data = await res.json();
+        if (data.status === 0) {
+          statusEl.textContent = 'Published!';
+          setTimeout(() => window.location.href = 'main page.html', 500);
+        } else {
+          statusEl.textContent = data.message || 'Failed to publish.';
+        }
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Network error.';
+      }
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', publish);
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      window.location.href = 'main page.html';
+    });
+
+    // 可选：选择本地文件后自动上传并填充 URL
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    const imageInput = document.getElementById('imageInput');
+    imageInput.insertAdjacentHTML('afterend', '<button id="uploadBtn" type="button" class="btn btn-secondary" style="margin-top:8px;">Upload from local</button>');
+    document.getElementById('uploadBtn').addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      if (!fileInput.files || !fileInput.files.length) return;
+      const file = fileInput.files[0];
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = 'Uploading...';
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await fetch(`${API_BASE}/upload`, {
+          method: 'POST',
+          headers: { Authorization: window.auth.getToken() },
+          body: formData
+        });
+        const data = await res.json();
+        if (data.status === 0 && data.data?.url) {
+          imageInput.value = `${window.API_BASE_URL}${data.data.url}`;
+          statusEl.textContent = 'Uploaded. URL filled.';
+        } else {
+          statusEl.textContent = data.message || 'Upload failed';
+        }
+      } catch (e) {
+        console.error(e);
+        statusEl.textContent = 'Network error during upload';
+      }
+    });
+
+    ensureLogin();
+  </script>
+</body>
+</html>
+

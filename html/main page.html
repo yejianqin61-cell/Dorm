@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMUM Dorm 厦马小筑</title>
+    <link rel="stylesheet" href="main_page_style.css">
+    <script src="./config.js"></script>
+    <script src="./auth.js"></script>
+</head>
+
+<body>
+    <!-- 背景图 -->
+    <div class="background-container"></div>
+
+    <div class="content-wrapper">
+        <!-- 顶部导航栏 -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="main page.html">XMUM Dorm 厦马小筑</a>
+                </div>
+                <div class="nav-links">
+                    <a href="乱七八糟.html" class="nav-link">???</a>
+                    <a href="create_post.html" class="nav-link">Create Post</a>
+                    <a href="safari.html" class="nav-link">Explore</a>
+                    <a href="log in.html" class="nav-link">Log In</a>
+                    <a href="myprofile.html" class="nav-link">My Profile</a>
+                </div>
+            </div>
+            <!-- 用户区域 - 已隐藏，头像移到 Campus Feed 右上角 -->
+            <div class="user-avatar-container" style="display: none;">
+                <div class="user-info" id="userInfo">
+                    <img src="" alt="Avatar" class="user-avatar" id="userAvatarNav">
+                </div>
+            </div>
+    </div>
+    </div>
+    </nav>
+    </nav>
+
+    <!-- 欢迎横幅 -->
+    <div class="welcome-banner">
+        <h1 class="welcome-title">Welcome to Xiamen University Dorm!</h1>
+        <div class="welcome-text">
+            <p>This is your campus life sharing community! It's your digital space to share your colorful routine,
+                from food reviews, beautiful scenery, event photos to club announcements and casual talk.</p>
+            <p>Discover the real XMUM together. <span class="highlight">FOR YOU, ONLY FOR YOU, DEAR XMUMER!!!</span>
+            </p>
+        </div>
+    </div>
+
+    <!-- 功能区域 -->
+    <div class="container">
+        <section class="features-section">
+            <h2 class="section-title">What You Can Do Here</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🍽️</div>
+                    <h3 class="feature-title">Food Reviews <br>(to be continue)</h3>
+                    <p>Share your favorite campus meals and dining spots</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🏞️</div>
+                    <h3 class="feature-title">Campus Scenery <br>(to be continue)</h3>
+                    <p>Capture and share beautiful moments around campus</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📢</div>
+                    <h3 class="feature-title">Event Announcements <br> (to be continue)</h3>
+                    <p>Stay updated with campus events and activities</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 class="feature-title">Casual Talk <br>(to be continue)</h3>
+                    <p>Connect with fellow XMUMers and share experiences</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">✨</div>
+                    <h3 class="feature-title">Coming Soon</h3>
+                    <p>New feature is under construction</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">🚀</div>
+                    <h3 class="feature-title">Coming Soon</h3>
+                    <p>New feature is under construction</p>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <!-- 动态流 -->
+    <div class="container">
+        <section class="features-section" style="position: relative;">
+            <!-- 用户头像 - 右上角 -->
+            <div class="feed-user-avatar" id="feedUserAvatar" style="display: none;">
+                <img src="" alt="Avatar" id="feedAvatarImg">
+            </div>
+            <h2 class="section-title">Campus Feed</h2>
+            <p style="margin-bottom:12px;">Latest posts from XMUM Dorm</p>
+            <div class="features-grid" id="feedList">
+                <!-- posts will be injected here -->
+            </div>
+            <div style="margin-top:12px;">
+                <a href="create_post.html" class="nav-link"
+                    style="padding:10px 14px;border:1px solid #1a5fb4;border-radius:8px;color:#1a5fb4;display:inline-block;">Create
+                    Post</a>
+                <span id="feedStatus" style="margin-left:10px;color:#666;"></span>
+            </div>
+        </section>
+    </div>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="container">
+            <p>© 2026 XMUM Dorm 厦马小筑 - Xiamen University Malaysia Campus Community</p>
+            <p>Designed for XMUMers, by yjq</p>
+        </div>
+    </footer>
+    </div>
+
+    <script src="main_page_script.js"></script>
+</body>
+
+</html>

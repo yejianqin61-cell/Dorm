@@ -1,0 +1,32 @@
+# 依赖
+node_modules/
+package-lock.json
+
+# 环境变量
+.env
+.env.local
+
+# 上传文件（生产环境应该用对象存储）
+uploads/*.jpg
+uploads/*.png
+uploads/*.jpeg
+uploads/*.gif
+!uploads/.gitkeep
+
+# 日志
+*.log
+npm-debug.log*
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 数据库密码等敏感信息（如果之前提交过，需要清理历史）
+# db/index.js 中的硬编码密码需要移除
+

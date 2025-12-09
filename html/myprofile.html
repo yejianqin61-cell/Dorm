@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile - XMUM Dorm</title>
+  <script src="./config.js"></script>
+  <script src="./auth.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f6fa;
+    }
+
+    .top-bar {
+      background-color: #007bff;
+      padding: 20px;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      font-weight: bold;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-container {
+      width: 90%;
+      max-width: 600px;
+      margin: 25px auto;
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .profile-header h2 {
+      font-size: 26px;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .profile-avatar img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #007bff;
+      margin-bottom: 15px;
+    }
+
+    .profile-info p {
+      font-size: 18px;
+      margin: 12px 0;
+      color: #444;
+    }
+
+    .profile-info span {
+      font-weight: bold;
+      color: #007bff;
+    }
+
+    .form-group {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #333;
+    }
+
+    .form-group input {
+      padding: 10px;
+      border: 1px solid #d9d9d9;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .btn-primary {
+      background-color: #007bff;
+    }
+
+    .btn-secondary {
+      background-color: #6c757d;
+    }
+
+    .logout-btn {
+      background-color: red;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      font-size: 20px;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="top-bar">XMUM Dorm - My Profile</div>
+
+  <div class="profile-container" id="profile">
+    <div class="loading">Loading...</div>
+  </div>
+  <div class="profile-container" id="myPosts">
+    <div class="loading">Loading my posts...</div>
+  </div>
+
+  <script>
+    const API_BASE = `${window.API_BASE_URL}/api`;
+
+    function ensureLogin() {
+      if (!window.auth || !window.auth.isLoggedIn()) {
+        alert('Please login first.');
+        window.location.href = 'log in.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadProfile() {
+      if (!ensureLogin()) return;
+
+      const token = window.auth.getToken();
+      const res = await fetch(`${API_BASE}/userinfo`, {
+        method: 'GET',
+        headers: { Authorization: token }
+      });
+      const data = await res.json();
+      const container = document.getElementById('profile');
+
+      if (data.status !== 0) {
+        container.innerHTML = `<p style="color:red;text-align:center;">Failed to load profile: ${data.message}</p>`;
+        return;
+      }
+
+      const user = data.data;
+      window.auth.updateUserData(user);
+
+      container.innerHTML = `
+        <div class="profile-header">
+          <div class="profile-avatar">
+            <img src="${user.picture || 'https://via.placeholder.com/110'}" alt="avatar">
+          </div>
+          <h2>${user.nickname || user.student_id}</h2>
+        </div>
+
+        <div class="profile-info">
+          <p>Email: <span>${user.email || ''}</span></p>
+          <p>Student ID: <span>${user.student_id || 'N/A'}</span></p>
+        </div>
+
+        <div class="form-group">
+          <label for="nicknameInput">Nickname</label>
+          <input id="nicknameInput" value="${user.nickname || ''}">
+        </div>
+        <div class="form-group">
+          <label for="emailInput">Email</label>
+          <input id="emailInput" type="email" value="${user.email || ''}">
+        </div>
+        <div class="form-group">
+          <label for="avatarInput">Avatar URL</label>
+          <input id="avatarInput" value="${user.picture || ''}">
+        </div>
+
+        <div class="actions">
+      <button class="btn btn-primary" id="saveProfileBtn">Save Profile</button>
+      <button class="btn btn-secondary" id="saveAvatarBtn">Update Avatar</button>
+      <button class="btn btn-secondary" id="uploadAvatarBtn" type="button">Upload Avatar (local)</button>
+      <button class="btn logout-btn" id="logoutBtn">Log Out</button>
+        </div>
+      `;
+
+      document.getElementById('saveProfileBtn').addEventListener('click', updateProfile);
+      document.getElementById('saveAvatarBtn').addEventListener('click', updateAvatar);
+  document.getElementById('uploadAvatarBtn').addEventListener('click', pickLocalAvatar);
+      document.getElementById('logoutBtn').addEventListener('click', logout);
+
+      loadMyPosts();
+    }
+
+    async function updateProfile() {
+      const nickname = document.getElementById('nicknameInput').value.trim();
+      const email = document.getElementById('emailInput').value.trim();
+      const res = await fetch(`${API_BASE}/userinfo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: window.auth.getToken()
+        },
+        body: JSON.stringify({ nickname, email })
+      });
+      const data = await res.json();
+      if (data.status === 0) {
+        alert('Profile updated');
+        loadProfile();
+      } else {
+        alert(data.message || 'Update failed');
+      }
+    }
+
+    async function updateAvatar() {
+      const avatar = document.getElementById('avatarInput').value.trim();
+      const res = await fetch(`${API_BASE}/update/avatar`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: window.auth.getToken()
+        },
+        body: JSON.stringify({ avatar })
+      });
+      const data = await res.json();
+      if (data.status === 0) {
+        alert('Avatar updated');
+    window.auth.updateUserData({ picture: avatar });
+        loadProfile();
+      } else {
+        alert(data.message || 'Update failed');
+      }
+    }
+
+    function logout() {
+      window.auth.logout();
+    }
+
+    async function loadMyPosts() {
+      const container = document.getElementById('myPosts');
+      container.innerHTML = '<div class="loading">Loading my posts...</div>';
+      try {
+        const res = await fetch(`${API_BASE}/posts/mine`, {
+          headers: { Authorization: window.auth.getToken() }
+        });
+        const data = await res.json();
+        if (data.status !== 0) {
+          container.innerHTML = `<p style="color:red;">Failed to load: ${data.message}</p>`;
+          return;
+        }
+        const posts = data.data || [];
+        if (!posts.length) {
+          container.innerHTML = '<p>No posts yet.</p>';
+          return;
+        }
+        container.innerHTML = `
+          <h3 style="margin-bottom:12px;">My Posts</h3>
+          ${posts.map(p => `
+            <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;">
+              <div style="font-size:13px;color:#666;">${new Date(p.created_at).toLocaleString()}</div>
+              <div style="margin:8px 0;white-space:pre-wrap;">${p.content}</div>
+              ${p.image_url ? `<img src="${p.image_url.startsWith('/uploads') ? window.API_BASE_URL + p.image_url : p.image_url}" style="max-width:100%;border-radius:6px;">` : ''}
+              <div style="margin-top:8px;display:flex;gap:10px;align-items:center;font-size:14px;color:#555;">
+                👍 ${p.like_count || 0} · 💬 ${p.comment_count || 0}
+                <button onclick="deleteMyPost(${p.id})" style="margin-left:auto;border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;">Delete</button>
+              </div>
+            </div>
+          `).join('')}
+        `;
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<p style="color:red;">Network error.</p>';
+      }
+    }
+
+    async function deleteMyPost(id) {
+      if (!confirm('Delete this post?')) return;
+      try {
+        const res = await fetch(`${API_BASE}/posts/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: window.auth.getToken() }
+        });
+        const data = await res.json();
+        if (data.status === 0) {
+          alert('Deleted');
+          loadMyPosts();
+        } else {
+          alert(data.message || 'Delete failed');
+        }
+      } catch (e) {
+        console.error(e);
+        alert('Network error');
+      }
+    }
+
+  // 头像本地上传
+  const avatarFileInput = document.createElement('input');
+  avatarFileInput.type = 'file';
+  avatarFileInput.accept = 'image/*';
+
+  async function pickLocalAvatar() {
+    avatarFileInput.click();
+  }
+
+  avatarFileInput.addEventListener('change', async () => {
+    if (!avatarFileInput.files || !avatarFileInput.files.length) return;
+    const file = avatarFileInput.files[0];
+    const avatarInput = document.getElementById('avatarInput');
+    const res = await fetch(`${API_BASE}/upload`, {
+      method: 'POST',
+      headers: { Authorization: window.auth.getToken() },
+      body: (() => {
+        const fd = new FormData();
+        fd.append('file', file);
+        return fd;
+      })()
+    });
+    const data = await res.json();
+    if (data.status === 0 && data.data?.url) {
+      const fullUrl = `${window.API_BASE_URL}${data.data.url}`;
+      avatarInput.value = fullUrl;
+      // 自动提交更新头像
+      await updateAvatar();
+    } else {
+      alert(data.message || 'Upload failed');
+    }
+  });
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+  </script>
+
+</body>
+
+</html>
