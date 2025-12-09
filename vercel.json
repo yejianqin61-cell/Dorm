@@ -1,8 +1,12 @@
 {
   "rewrites": [
     {
+      "source": "/",
+      "destination": "/log in.html"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/html/$1"
+      "destination": "/$1"
     }
   ],
   "headers": [
