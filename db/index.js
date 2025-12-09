@@ -21,13 +21,15 @@ if (process.env.MYSQL_URL) {
     database: url.pathname.replace('/', '')
   };
 } else {
-  // 否则使用分开的变量
+  // 否则使用分开的变量，并清理格式问题（去除 \n= 前缀等）
+  const cleanEnv = (val) => val ? val.replace(/^[\n=]+/, '').trim() : null;
+  
   dbConfig = {
-    host: process.env.DB_HOST || process.env.MYSQLHOST || '127.0.0.1',
-    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : (process.env.MYSQLPORT ? parseInt(process.env.MYSQLPORT) : 3306),
-    user: process.env.DB_USER || process.env.MYSQLUSER || 'root',
-    password: process.env.DB_PASSWORD || process.env.MYSQLPASSWORD || '20061016177Jack',
-    database: process.env.DB_NAME || process.env.MYSQLDATABASE || 'my_db'
+    host: cleanEnv(process.env.DB_HOST) || cleanEnv(process.env.MYSQLHOST) || 'switchback.proxy.rlwy.net',
+    port: process.env.DB_PORT ? parseInt(process.env.DB_PORT) : (process.env.MYSQLPORT ? parseInt(process.env.MYSQLPORT) : 37445),
+    user: cleanEnv(process.env.DB_USER) || cleanEnv(process.env.MYSQLUSER) || 'root',
+    password: cleanEnv(process.env.DB_PASSWORD) || cleanEnv(process.env.MYSQLPASSWORD) || '20061016177Jack',
+    database: cleanEnv(process.env.DB_NAME) || cleanEnv(process.env.MYSQLDATABASE) || 'railway'
   };
 }
 
