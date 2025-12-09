@@ -157,7 +157,7 @@
       const token = window.auth.getToken();
       const res = await fetch(`${API_BASE}/userinfo`, {
         method: 'GET',
-        headers: { Authorization: token }
+        headers: { Authorization: token ? `Bearer ${token}` : '' }
       });
       const data = await res.json();
       const container = document.getElementById('profile');
@@ -219,7 +219,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: window.auth.getToken()
+          Authorization: window.auth.getToken() ? `Bearer ${window.auth.getToken()}` : ''
         },
         body: JSON.stringify({ nickname, email })
       });
@@ -238,7 +238,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: window.auth.getToken()
+          Authorization: window.auth.getToken() ? `Bearer ${window.auth.getToken()}` : ''
         },
         body: JSON.stringify({ avatar })
       });

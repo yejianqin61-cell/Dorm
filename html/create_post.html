@@ -70,7 +70,7 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: window.auth.getToken()
+            Authorization: window.auth.getToken() ? `Bearer ${window.auth.getToken()}` : ''
           },
           body: JSON.stringify({ content, image_url })
         });

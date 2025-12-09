@@ -56,9 +56,10 @@ async function loadFeed() {
 
   setFeedStatus('Loading...');
   try {
+    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts`, {
       headers: {
-        Authorization: window.auth?.getToken() || ''
+        Authorization: token ? `Bearer ${token}` : ''
       }
     });
     const data = await res.json();
@@ -182,10 +183,11 @@ function renderComments(list) {
 
 async function toggleLike(postId, btn) {
   try {
+    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/like`, {
       method: 'POST',
       headers: {
-        Authorization: window.auth?.getToken() || ''
+        Authorization: token ? `Bearer ${token}` : ''
       }
     });
     const data = await res.json();
@@ -205,11 +207,12 @@ async function sendComment(postId, input) {
   const content = input?.value.trim();
   if (!content) return;
   try {
+    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/comment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: window.auth?.getToken() || ''
+        Authorization: token ? `Bearer ${token}` : ''
       },
       body: JSON.stringify({ content })
     });
@@ -234,8 +237,9 @@ async function toggleComments(postId, forceRefresh = false) {
     return;
   }
   try {
+    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/comment`, {
-      headers: { Authorization: window.auth?.getToken() || '' }
+      headers: { Authorization: token ? `Bearer ${token}` : '' }
     });
     const data = await res.json();
     if (data.status === 0) {
@@ -254,9 +258,10 @@ async function toggleComments(postId, forceRefresh = false) {
 async function deletePost(postId) {
   if (!confirm('Delete this post?')) return;
   try {
+    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}`, {
       method: 'DELETE',
-      headers: { Authorization: window.auth?.getToken() || '' }
+      headers: { Authorization: token ? `Bearer ${token}` : '' }
     });
     const data = await res.json();
     if (data.status === 0) {
