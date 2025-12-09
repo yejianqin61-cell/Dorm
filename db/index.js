@@ -12,14 +12,20 @@ let dbConfig = {
 
 // 如果提供了完整的 MySQL URL，解析它
 if (process.env.MYSQL_URL) {
-  const url = new URL(process.env.MYSQL_URL);
-  dbConfig = {
-    host: url.hostname,
-    port: parseInt(url.port) || 3306,
-    user: url.username,
-    password: url.password,
-    database: url.pathname.replace('/', '')
-  };
+  try {
+    const url = new URL(process.env.MYSQL_URL);
+    dbConfig = {
+      host: url.hostname,
+      port: parseInt(url.port) || 3306,
+      user: url.username,
+      password: url.password,
+      database: url.pathname.replace('/', '')
+    };
+    console.log('Using MYSQL_URL for database connection');
+  } catch (err) {
+    console.error('Failed to parse MYSQL_URL:', err.message);
+    console.log('Falling back to individual variables');
+  }
 } else {
   // 否则使用分开的变量，并清理格式问题（去除 \n= 前缀等）
   const cleanEnv = (val) => val ? val.replace(/^[\n=]+/, '').trim() : null;
