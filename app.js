@@ -3,6 +3,15 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
+// 初始化数据库表（仅在启动时执行一次）
+if (process.env.NODE_ENV !== 'production' || process.env.INIT_DB === 'true') {
+  try {
+    require('./db/init.js');
+  } catch (err) {
+    console.log('Database init skipped or failed:', err.message);
+  }
+}
+
 const joi = require('joi');
 
 // res.cc 定义必须放在前面
