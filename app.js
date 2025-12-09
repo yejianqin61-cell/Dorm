@@ -3,14 +3,14 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
-// 初始化数据库表（仅在启动时执行一次）
-if (process.env.NODE_ENV !== 'production' || process.env.INIT_DB === 'true') {
+// 初始化数据库表（启动时自动执行）
+setTimeout(() => {
   try {
     require('./db/init.js');
   } catch (err) {
     console.log('Database init skipped or failed:', err.message);
   }
-}
+}, 2000); // 延迟2秒执行，确保数据库连接已建立
 
 const joi = require('joi');
 
