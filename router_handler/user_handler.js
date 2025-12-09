@@ -59,7 +59,7 @@ exports.login = (req, res) => {
         return res.send({
           status: 0,
           message: '登录成功！（演示账号）',
-          token: 'Bearer ' + tokenStr,
+          token: tokenStr,
           data: {
             id: -1,
             student_id: demoId,
@@ -85,7 +85,7 @@ exports.login = (req, res) => {
     res.send({
       status: 0,
       message: '登录成功！',
-      token: 'Bearer ' + tokenStr,
+      token: tokenStr,
       data: {
         id: results[0].id,
         student_id: results[0].student_id,
