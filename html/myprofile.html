@@ -125,6 +125,75 @@
       font-size: 20px;
       color: #555;
     }
+
+    /* 移动端响应式 */
+    @media (max-width: 768px) {
+      .top-bar {
+        padding: 15px;
+        font-size: 18px;
+      }
+
+      .profile-container {
+        width: 95%;
+        margin: 15px auto;
+        padding: 20px 15px;
+      }
+
+      .profile-header h2 {
+        font-size: 20px;
+      }
+
+      .profile-avatar img {
+        width: 80px;
+        height: 80px;
+        border-width: 3px;
+      }
+
+      .profile-info p {
+        font-size: 16px;
+        margin: 10px 0;
+      }
+
+      .form-group {
+        margin-top: 12px;
+      }
+
+      .form-group input {
+        padding: 8px;
+        font-size: 14px;
+      }
+
+      .actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .top-bar {
+        font-size: 16px;
+        padding: 12px;
+      }
+
+      .profile-container {
+        padding: 15px 10px;
+      }
+
+      .profile-avatar img {
+        width: 70px;
+        height: 70px;
+      }
+
+      .profile-header h2 {
+        font-size: 18px;
+      }
+    }
   </style>
 </head>
 

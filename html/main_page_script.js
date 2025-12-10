@@ -103,15 +103,15 @@ function renderFeed(posts) {
         </div>
         <div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(post.content)}</div>
         ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;object-fit:cover;margin-bottom:8px;">` : ''}
-        <div style="display:flex;gap:12px;align-items:center;">
-          <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:8px 12px;border-radius:6px;cursor:pointer;">👍 ${post.like_count || 0}</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">👍 ${post.like_count || 0}</button>
           <span style="color:#666;font-size:14px;">💬 ${post.comment_count || 0}</span>
-          <button class="comment-toggle-btn" data-id="${post.id}" style="border:none;background:#f0f4f9;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;">${expanded ? 'Hide' : 'Show'} comments</button>
-          ${isMine ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;">Delete</button>` : ''}
+          <button class="comment-toggle-btn" data-id="${post.id}" style="border:none;background:#f0f4f9;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">${expanded ? 'Hide' : 'Show'} comments</button>
+          ${isMine ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">Delete</button>` : ''}
         </div>
-        <div style="margin-top:8px;display:flex;gap:8px;">
-          <input type="text" placeholder="Add a comment" class="comment-input" style="flex:1;padding:8px;border:1px solid #d9d9d9;border-radius:6px;">
-          <button class="comment-btn" data-id="${post.id}" style="border:none;background:#1a5fb4;color:#fff;padding:8px 12px;border-radius:6px;cursor:pointer;">Send</button>
+        <div style="margin-top:8px;display:flex;gap:6px;">
+          <input type="text" placeholder="Add a comment" class="comment-input" style="flex:1;padding:6px 8px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;">
+          <button class="comment-btn" data-id="${post.id}" style="border:none;background:#1a5fb4;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px;white-space:nowrap;">Send</button>
         </div>
         ${expanded ? renderComments(comments) : ''}
       </div>

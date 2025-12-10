@@ -282,16 +282,83 @@
 
     @media (max-width: 768px) {
       .nav-container {
-        flex-direction: column;
-        gap: 15px;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 0 15px;
+      }
+
+      .logo {
+        font-size: 1.2rem;
       }
 
       .nav-links {
-        gap: 15px;
+        gap: 8px;
+        font-size: 0.85rem;
+      }
+
+      .nav-link {
+        padding: 6px 10px;
+        font-size: 0.85rem;
       }
 
       .login-card {
-        margin-top: 80px;
+        margin-top: 70px;
+        max-width: 95%;
+        border-radius: 15px;
+      }
+
+      .login-header {
+        padding: 25px 20px;
+      }
+
+      .login-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .login-form {
+        padding: 25px 20px;
+      }
+
+      .form-control {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+
+      .login-button {
+        padding: 12px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo {
+        font-size: 1rem;
+      }
+
+      .nav-links {
+        gap: 5px;
+        font-size: 0.75rem;
+      }
+
+      .nav-link {
+        padding: 5px 8px;
+        font-size: 0.75rem;
+      }
+
+      .login-card {
+        margin-top: 60px;
+      }
+
+      .login-header h1 {
+        font-size: 1.3rem;
+      }
+
+      .login-header p {
+        font-size: 0.85rem;
+      }
+
+      .form-control {
+        font-size: 13px;
       }
     }
   </style>

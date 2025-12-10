@@ -20,6 +20,61 @@
     .btn-primary { background: #1a5fb4; }
     .btn-secondary { background: #6c757d; }
     .status { margin-top: 12px; font-size: 14px; color: #555; }
+
+    /* 移动端响应式 */
+    @media (max-width: 768px) {
+      .container {
+        margin: 20px auto;
+        padding: 20px 15px;
+        border-radius: 10px;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .form-group {
+        margin-bottom: 14px;
+      }
+
+      label {
+        font-size: 14px;
+      }
+
+      textarea, input {
+        padding: 10px;
+        font-size: 14px;
+      }
+
+      textarea {
+        min-height: 120px;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        margin: 15px auto;
+        padding: 15px 10px;
+      }
+
+      h1 {
+        font-size: 1.3rem;
+      }
+
+      textarea, input {
+        font-size: 13px;
+      }
+    }
   </style>
 </head>
 <body>

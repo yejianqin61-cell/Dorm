@@ -180,88 +180,155 @@ footer {
   margin-top: 50px;
 }
 
-/* 响应式优化 */
+/* 响应式优化 - 移动端 */
 @media (max-width: 768px) {
+  /* 导航栏 */
   .nav-container {
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 15px;
+  }
+
+  .logo {
+    font-size: 1.3rem;
   }
 
   .nav-links {
-    gap: 15px;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.85rem;
   }
 
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+  }
+
+  /* 欢迎横幅 */
   .welcome-banner {
-    padding: 30px 20px;
-    margin: 20px;
+    padding: 25px 15px;
+    margin: 15px;
+    border-radius: 15px;
   }
 
   .welcome-title {
-    font-size: 2rem;
+    font-size: 1.5rem;
+    margin-bottom: 15px;
   }
 
+  .welcome-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* 主容器 */
+  .container {
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+
+  /* 功能区域 */
   .features-section {
-    padding: 25px;
+    padding: 20px 15px;
+    border-radius: 15px;
+    margin-bottom: 20px;
   }
 
-  .user-avatar-container {
-    position: relative;
-    display: flex;
-    align-items: center;
+  .section-title {
+    font-size: 1.5rem;
+    margin-bottom: 25px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
     gap: 15px;
   }
 
-  .user-avatar {
+  .feature-card {
+    padding: 18px;
+    border-radius: 12px;
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .feature-title {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  /* Campus Feed 右上角头像 */
+  .feed-user-avatar {
+    top: 10px;
+    right: 10px;
+  }
+
+  .feed-user-avatar img {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    border: 2px solid #1a5fb4;
-    object-fit: cover;
-    cursor: pointer;
-    background-color: white;
+    border-width: 2px;
   }
 
-  .user-dropdown {
-    position: absolute;
-    top: 50px;
-    right: 0;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    padding: 10px 0;
-    min-width: 150px;
-    display: none;
-    z-index: 1000;
+  /* 动态卡片内的按钮和输入框 */
+  .feature-card button,
+  .feature-card input {
+    font-size: 0.85rem;
+    padding: 6px 10px;
   }
 
-  .user-dropdown.show {
-    display: block;
+  .feature-card .comment-input {
+    font-size: 0.85rem;
+    padding: 6px 8px;
   }
 
-  .dropdown-item {
-    padding: 10px 20px;
-    color: #333;
-    text-decoration: none;
-    display: block;
-    transition: background 0.3s;
+  /* 页脚 */
+  footer {
+    padding: 20px 15px;
+    font-size: 0.85rem;
+  }
+}
+
+/* 超小屏幕优化 */
+@media (max-width: 480px) {
+  .logo {
+    font-size: 1.1rem;
   }
 
-  .dropdown-item:hover {
-    background-color: #f5f5f5;
+  .nav-links {
+    gap: 5px;
+    font-size: 0.75rem;
   }
 
-  .login-btn {
-    padding: 8px 15px;
-    background: linear-gradient(135deg, #1a5fb4 0%, #3584e4 100%);
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
+  .nav-link {
+    padding: 5px 8px;
+    font-size: 0.75rem;
   }
 
-  .user-info {
-    display: none;
-    align-items: center;
-    gap: 10px;
+  .welcome-title {
+    font-size: 1.3rem;
+  }
+
+  .welcome-text {
+    font-size: 0.85rem;
+  }
+
+  .section-title {
+    font-size: 1.3rem;
+  }
+
+  .features-section {
+    padding: 15px 10px;
+  }
+
+  .feature-card {
+    padding: 15px;
+  }
+
+  .feed-user-avatar img {
+    width: 35px;
+    height: 35px;
   }
 }
 
