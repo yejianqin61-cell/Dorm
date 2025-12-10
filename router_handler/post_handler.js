@@ -70,16 +70,21 @@ exports.listMyPosts = (req, res) => {
   });
 };
 
-// 删除动态（仅作者）
+// 删除动态（作者或管理员）
 exports.deletePost = (req, res) => {
   const postId = req.params.id;
   const userId = req.user.id;
+  const isAdmin = req.user.is_admin || 0; // 从 token 中获取管理员标识
 
   const checkSql = 'select user_id from ev_posts where id=?';
   db.query(checkSql, [postId], (err, rows) => {
     if (err) return res.cc(err);
     if (!rows.length) return res.cc('帖子不存在');
-    if (rows[0].user_id !== userId) return res.cc('只能删除自己的帖子');
+    
+    // 检查权限：必须是作者或者是管理员
+    if (rows[0].user_id !== userId && !isAdmin) {
+      return res.cc('只能删除自己的帖子');
+    }
 
     const delLikes = 'delete from ev_post_likes where post_id=?';
     const delComments = 'delete from ev_post_comments where post_id=?';
@@ -92,7 +97,10 @@ exports.deletePost = (req, res) => {
         db.query(delPost, [postId], (e3, result) => {
           if (e3) return res.cc(e3);
           if (result.affectedRows !== 1) return res.cc('删除失败');
-          res.send({ status: 0, message: '删除成功' });
+          res.send({ 
+            status: 0, 
+            message: isAdmin ? '删除成功（管理员操作）' : '删除成功' 
+          });
         });
       });
     });

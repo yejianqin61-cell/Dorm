@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS ev_users (
   nickname VARCHAR(100),
   email VARCHAR(255),
   picture VARCHAR(500),
+  is_admin TINYINT(1) DEFAULT 0 COMMENT '是否为管理员，1=是，0=否',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -34,4 +35,7 @@ CREATE TABLE IF NOT EXISTS ev_post_comments (
   content TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 为现有表添加 is_admin 字段（如果不存在，会报错但可以忽略）
+-- 注意：如果字段已存在，ALTER TABLE 会报错，但不会影响其他操作
 

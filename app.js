@@ -7,6 +7,14 @@ const app = express();
 setTimeout(() => {
   try {
     require('./db/init.js');
+    // 延迟执行管理员设置，确保表已创建
+    setTimeout(() => {
+      try {
+        require('./db/set_admin.js');
+      } catch (err) {
+        console.log('Admin setup skipped or failed:', err.message);
+      }
+    }, 5000); // 在数据库初始化后5秒执行
   } catch (err) {
     console.log('Database init skipped or failed:', err.message);
   }

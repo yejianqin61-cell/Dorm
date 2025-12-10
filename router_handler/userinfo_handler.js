@@ -17,12 +17,13 @@ exports.getUserInfo = (req, res) => {
         student_id: req.user.student_id || 'CST1234567',
         nickname: req.user.student_id || 'CST1234567',
         email: 'demo@example.com',
-        picture: null
+        picture: null,
+        is_admin: 0
       }
     });
   }
 
-  const sql = 'select id, student_id, nickname, email, picture from ev_users where id=?';
+  const sql = 'select id, student_id, nickname, email, picture, is_admin from ev_users where id=?';
 
   db.query(sql, req.user.id, (err, results) => {
     if (err) {

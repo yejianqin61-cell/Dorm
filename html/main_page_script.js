@@ -88,7 +88,10 @@ function renderFeed(posts) {
   feedList.innerHTML = posts.map(post => {
     const created = new Date(post.created_at).toLocaleString();
     const imgSrc = normalizeImageUrl(post.image_url);
-    const isMine = window.auth?.getUser()?.id === post.user_id;
+    const currentUser = window.auth?.getUser();
+    const isMine = currentUser?.id === post.user_id;
+    const isAdmin = currentUser?.is_admin === 1 || currentUser?.is_admin === true;
+    const canDelete = isMine || isAdmin; // 作者或管理员可以删除
     const expanded = expandedSet.has(post.id);
     const comments = commentsCache[post.id] || [];
     const avatarSrc = normalizeImageUrl(post.user_picture) || 'default_avatar.png';
@@ -107,7 +110,7 @@ function renderFeed(posts) {
           <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">👍 ${post.like_count || 0}</button>
           <span style="color:#666;font-size:14px;">💬 ${post.comment_count || 0}</span>
           <button class="comment-toggle-btn" data-id="${post.id}" style="border:none;background:#f0f4f9;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">${expanded ? 'Hide' : 'Show'} comments</button>
-          ${isMine ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">Delete</button>` : ''}
+          ${canDelete ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:${isAdmin && !isMine ? '#fff3cd' : '#fbeaea'};color:${isAdmin && !isMine ? '#856404' : '#d9534f'};padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;" title="${isAdmin && !isMine ? '管理员删除' : '删除'}">${isAdmin && !isMine ? '🗑️ Admin Delete' : 'Delete'}</button>` : ''}
         </div>
         <div style="margin-top:8px;display:flex;gap:6px;">
           <input type="text" placeholder="Add a comment" class="comment-input" style="flex:1;padding:6px 8px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;">

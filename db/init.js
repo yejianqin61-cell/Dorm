@@ -48,6 +48,9 @@ const executeStatements = async () => {
               console.log(`Table does not exist, skipping DROP statement ${index + 1}...`);
             } else if (err.code === 'ER_TABLE_EXISTS_ERROR' || err.code === 'ER_DUP_KEYNAME') {
               console.log(`Table already exists, skipping statement ${index + 1}...`);
+            } else if (err.code === 'ER_DUP_FIELDNAME') {
+              // 字段已存在，忽略错误
+              console.log(`Column already exists, skipping ALTER TABLE statement ${index + 1}...`);
             } else {
               console.error(`Error executing statement ${index + 1}:`, err.message);
               console.error(`Statement was:`, statement.substring(0, 200));
