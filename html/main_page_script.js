@@ -333,3 +333,134 @@ function clearLoginData() {
   localStorage.removeItem('userData');
   window.location.href = 'log in.html';
 }
+
+// 加载官方通知弹窗
+async function loadOfficialNotices() {
+  if (!window.auth || !window.auth.isLoggedIn()) return;
+  
+  try {
+    const token = window.auth.getToken();
+    const res = await fetch(`${window.API_BASE_URL}/api/posts/official/notices`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '' 
+      }
+    });
+    
+    if (!res.ok) {
+      console.error('Failed to fetch official notices:', res.status, res.statusText);
+      return;
+    }
+    
+    const data = await res.json();
+    
+    if (data.status === 0 && data.data && data.data.length > 0) {
+      // 显示第一个未读的官方通知
+      showOfficialNoticePopup(data.data[0]);
+    }
+  } catch (e) {
+    console.error('Error loading official notices:', e);
+  }
+}
+
+// 显示官方通知弹窗
+function showOfficialNoticePopup(post) {
+  const popup = document.createElement('div');
+  popup.id = 'officialNoticePopup';
+  popup.style.cssText = `
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+    padding: 30px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 10000;
+  `;
+  
+  const imgSrc = normalizeImageUrl(post.image_url);
+  
+  popup.innerHTML = `
+    <div style="text-align:center;margin-bottom:20px;">
+      <h2 style="color:#1a5fb4;margin-bottom:10px;">📢 Official Notice</h2>
+      <div style="font-size:14px;color:#666;">From: ${post.nickname || post.student_id || 'XMUM Dorm'}</div>
+    </div>
+    <div style="margin-bottom:20px;white-space:pre-wrap;line-height:1.6;">${escapeHtml(post.content)}</div>
+    ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;margin-bottom:20px;" onerror="this.style.display='none';">` : ''}
+    <div style="text-align:center;">
+      <button id="confirmNoticeBtn" style="background:#1a5fb4;color:white;border:none;padding:12px 30px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;">Got it</button>
+    </div>
+  `;
+  
+  document.body.appendChild(popup);
+  
+  // 添加遮罩层
+  const overlay = document.createElement('div');
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+  `;
+  document.body.insertBefore(overlay, popup);
+  
+  // 确认按钮事件
+  document.getElementById('confirmNoticeBtn').addEventListener('click', async () => {
+    // 标记为已读
+    try {
+      const token = window.auth.getToken();
+      await fetch(`${window.API_BASE_URL}/api/posts/official/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token ? `Bearer ${token}` : ''
+        },
+        body: JSON.stringify({ post_id: post.id })
+      });
+    } catch (e) {
+      console.error('Error marking notice as read:', e);
+    }
+    
+    // 移除弹窗和遮罩
+    popup.remove();
+    overlay.remove();
+  });
+}
+
+// 加载通知数量
+async function loadNotificationCount() {
+  if (!window.auth || !window.auth.isLoggedIn()) return;
+  
+  try {
+    const token = window.auth.getToken();
+    const res = await fetch(`${window.API_BASE_URL}/api/posts/official/notices`, {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '' 
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      const badge = document.getElementById('notificationBadge');
+      if (badge && data.status === 0 && data.data && data.data.length > 0) {
+        badge.textContent = data.data.length;
+        badge.style.display = 'block';
+      } else if (badge) {
+        badge.style.display = 'none';
+      }
+    }
+  } catch (e) {
+    console.error('Error loading notification count:', e);
+  }
+}
