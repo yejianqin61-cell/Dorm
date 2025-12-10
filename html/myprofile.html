@@ -260,8 +260,9 @@
       const container = document.getElementById('myPosts');
       container.innerHTML = '<div class="loading">Loading my posts...</div>';
       try {
+        const token = window.auth.getToken();
         const res = await fetch(`${API_BASE}/posts/mine`, {
-          headers: { Authorization: window.auth.getToken() }
+          headers: { Authorization: token ? `Bearer ${token}` : '' }
         });
         const data = await res.json();
         if (data.status !== 0) {
@@ -296,9 +297,10 @@
     async function deleteMyPost(id) {
       if (!confirm('Delete this post?')) return;
       try {
+        const token = window.auth.getToken();
         const res = await fetch(`${API_BASE}/posts/${id}`, {
           method: 'DELETE',
-          headers: { Authorization: window.auth.getToken() }
+          headers: { Authorization: token ? `Bearer ${token}` : '' }
         });
         const data = await res.json();
         if (data.status === 0) {
@@ -326,9 +328,10 @@
     if (!avatarFileInput.files || !avatarFileInput.files.length) return;
     const file = avatarFileInput.files[0];
     const avatarInput = document.getElementById('avatarInput');
+    const token = window.auth.getToken();
     const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
-      headers: { Authorization: window.auth.getToken() },
+      headers: { Authorization: token ? `Bearer ${token}` : '' },
       body: (() => {
         const fd = new FormData();
         fd.append('file', file);

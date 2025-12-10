@@ -107,9 +107,10 @@
       const formData = new FormData();
       formData.append('file', file);
       try {
+        const token = window.auth.getToken();
         const res = await fetch(`${API_BASE}/upload`, {
           method: 'POST',
-          headers: { Authorization: window.auth.getToken() },
+          headers: { Authorization: token ? `Bearer ${token}` : '' },
           body: formData
         });
         const data = await res.json();
