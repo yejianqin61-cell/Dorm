@@ -43,6 +43,9 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
+// 获取真实IP地址（用于统计）
+app.set('trust proxy', true);
+
 // 静态访问上传文件（必须在 JWT 之前，否则会被拦截）
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -56,6 +59,7 @@ const userRouter = require('./router/user.js');
 const userinfoRouter = require('./router/userinfo.js');
 const postRouter = require('./router/post.js');
 const uploadRouter = require('./router/upload.js');
+const statisticsRouter = require('./router/statistics.js');
 
 // token 认证，仅放行注册、登录等公开接口
 app.use(
