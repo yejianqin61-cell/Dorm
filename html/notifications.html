@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications - XMUM Dorm</title>
+  <script src="./config.js"></script>
+  <script src="./auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+    }
+    .top-bar {
+      background-color: #007bff;
+      padding: 20px;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .notification-item {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .notification-item h3 {
+      color: #1a5fb4;
+      margin-bottom: 10px;
+    }
+    .notification-item .content {
+      color: #333;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      margin-bottom: 10px;
+    }
+    .notification-item .time {
+      font-size: 12px;
+      color: #999;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .empty {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">📬 Notifications</div>
+  <div class="container" id="notificationsContainer">
+    <div class="loading">Loading notifications...</div>
+  </div>
+
+  <script>
+    const API_BASE = `${window.API_BASE_URL}/api`;
+
+    function ensureLogin() {
+      if (!window.auth || !window.auth.isLoggedIn()) {
+        alert('Please login first.');
+        window.location.href = 'log in.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadNotifications() {
+      if (!ensureLogin()) return;
+
+      const container = document.getElementById('notificationsContainer');
+      
+      try {
+        const token = window.auth.getToken();
+        // 获取官方通知帖子
+        const res = await fetch(`${API_BASE}/posts/official/notices`, {
+          headers: { Authorization: token ? `Bearer ${token}` : '' }
+        });
+        const data = await res.json();
+        
+        if (data.status !== 0) {
+          container.innerHTML = `<div class="empty">Failed to load: ${data.message}</div>`;
+          return;
+        }
+        
+        const notices = data.data || [];
+        
+        if (notices.length === 0) {
+          container.innerHTML = '<div class="empty">No notifications yet.</div>';
+          return;
+        }
+        
+        container.innerHTML = notices.map(notice => {
+          const created = new Date(notice.created_at).toLocaleString();
+          const imgSrc = notice.image_url ? 
+            (notice.image_url.startsWith('http') ? notice.image_url : `${window.API_BASE_URL}${notice.image_url}`) : '';
+          
+          return `
+            <div class="notification-item">
+              <h3>📢 ${notice.nickname || notice.student_id || 'Official'}</h3>
+              <div class="content">${notice.content}</div>
+              ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;margin:10px 0;" onerror="this.style.display='none';">` : ''}
+              <div class="time">${created}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="empty">Network error.</div>';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadNotifications);
+  </script>
+</body>
+</html>
+

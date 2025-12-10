@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const user = auth.getUser();
     showUserAvatar(user);
     loadFeed();
+    // 加载官方通知弹窗
+    loadOfficialNotices();
+    // 加载通知数量
+    loadNotificationCount();
   } else {
     setFeedStatus('Please log in to view the feed.');
   }

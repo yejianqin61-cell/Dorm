@@ -2,16 +2,23 @@ const db = require('../db/index.js');
 
 // 创建动态
 exports.createPost = (req, res) => {
-  const { content, image_url } = req.body;
-  const sql = 'insert into ev_posts (user_id, content, image_url) values (?, ?, ?)';
-  db.query(sql, [req.user.id, content, image_url || null], (err, results) => {
+  const { content, image_url, is_official } = req.body;
+  const userId = req.user.id;
+  const userStudentId = req.user.student_id;
+  
+  // 检查是否为官方账号（XMUMDORM）
+  const isOfficialAccount = userStudentId === 'XMUMDORM';
+  const officialFlag = is_official || (isOfficialAccount ? 1 : 0);
+  
+  const sql = 'insert into ev_posts (user_id, content, image_url, is_official) values (?, ?, ?, ?)';
+  db.query(sql, [userId, content, image_url || null, officialFlag], (err, results) => {
     if (err) return res.cc(err);
     if (results.affectedRows !== 1) return res.cc('发布失败，请稍后重试');
     res.send({ status: 0, message: '发布成功' });
   });
 };
 
-// 获取动态列表
+// 获取动态列表（排除官方帖子）
 exports.listPosts = (req, res) => {
   const pageSize = Number(req.query.limit) || 20;
   const offset = Number(req.query.offset) || 0;
@@ -30,6 +37,7 @@ exports.listPosts = (req, res) => {
       (SELECT COUNT(*) FROM ev_post_comments c WHERE c.post_id = p.id) AS comment_count
     FROM ev_posts p
     LEFT JOIN ev_users u ON p.user_id = u.id
+    WHERE p.is_official = 0
     ORDER BY p.created_at DESC
     LIMIT ? OFFSET ?;
   `;

@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS ev_posts (
   user_id INT NOT NULL,
   content TEXT NOT NULL,
   image_url VARCHAR(500),
+  is_official TINYINT(1) DEFAULT 0 COMMENT '是否为官方帖子，1=是，0=否',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -38,4 +39,24 @@ CREATE TABLE IF NOT EXISTS ev_post_comments (
 
 -- 为现有表添加 is_admin 字段（如果不存在，会报错但可以忽略）
 -- 注意：如果字段已存在，ALTER TABLE 会报错，但不会影响其他操作
+
+-- 创建通知表
+CREATE TABLE IF NOT EXISTS ev_notifications (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT COMMENT 'NULL表示所有用户，具体ID表示特定用户',
+  title VARCHAR(200) NOT NULL,
+  content TEXT NOT NULL,
+  is_read TINYINT(1) DEFAULT 0 COMMENT '是否已读，1=已读，0=未读',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 创建用户已读通知记录表（用于弹窗通知）
+CREATE TABLE IF NOT EXISTS ev_user_read_notices (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  notice_id INT NOT NULL COMMENT '通知ID，如果是官方帖子弹窗，则为帖子ID',
+  notice_type VARCHAR(50) DEFAULT 'notification' COMMENT '通知类型：notification=普通通知，post_popup=帖子弹窗',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY uniq_user_notice (user_id, notice_id, notice_type)
+);
 

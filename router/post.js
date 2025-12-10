@@ -23,6 +23,10 @@ router.post('/posts/:id/like', expressJoi(post_id_schema), post_handler.toggleLi
 router.post('/posts/:id/comment', expressJoi(create_comment_schema), post_handler.createComment);
 // 获取评论列表
 router.get('/posts/:id/comment', expressJoi(post_id_schema), post_handler.listComments);
+// 获取官方通知帖子（用于弹窗）
+router.get('/posts/official/notices', post_handler.getOfficialNotices);
+// 标记官方帖子为已读
+router.post('/posts/official/read', post_handler.markOfficialNoticeRead);
 
 module.exports = router;
 

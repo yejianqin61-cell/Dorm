@@ -11,8 +11,10 @@ setTimeout(() => {
     setTimeout(() => {
       try {
         require('./db/set_admin.js');
+        // 创建官方账号
+        require('./db/create_official_account.js');
       } catch (err) {
-        console.log('Admin setup skipped or failed:', err.message);
+        console.log('Admin/Official account setup skipped or failed:', err.message);
       }
     }, 5000); // 在数据库初始化后5秒执行
   } catch (err) {
