@@ -464,3 +464,21 @@ async function loadNotificationCount() {
     console.error('Error loading notification count:', e);
   }
 }
+
+// 记录页面访问
+async function recordPageView(pagePath) {
+  try {
+    const userId = window.auth?.getUser()?.id || null;
+    await fetch(`${window.API_BASE_URL}/api/statistics/view`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        page_path: pagePath || window.location.pathname,
+        user_id: userId
+      })
+    });
+  } catch (e) {
+    // 静默失败，不影响用户体验
+    console.error('Failed to record page view:', e);
+  }
+}

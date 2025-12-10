@@ -63,3 +63,15 @@ CREATE TABLE IF NOT EXISTS ev_user_read_notices (
   UNIQUE KEY uniq_user_notice (user_id, notice_id, notice_type)
 );
 
+-- 创建访问统计表（记录页面浏览量）
+CREATE TABLE IF NOT EXISTS ev_page_views (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  page_path VARCHAR(200) NOT NULL COMMENT '页面路径',
+  user_id INT COMMENT '用户ID，NULL表示未登录用户',
+  ip_address VARCHAR(50) COMMENT 'IP地址',
+  user_agent TEXT COMMENT '用户代理',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_page_path (page_path),
+  INDEX idx_created_at (created_at)
+);
+

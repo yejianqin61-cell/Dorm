@@ -63,6 +63,7 @@ app.use(
     path: [
       /^\/api\/reguser$/,
       /^\/api\/login$/,
+      /^\/api\/statistics\/view$/,  // 允许记录页面访问
       /^\/uploads\//  // 排除静态文件路径
     ]
   })
@@ -73,6 +74,7 @@ app.use('/api', userRouter);
 app.use('/api', userinfoRouter);
 app.use('/api', postRouter);
 app.use('/api', uploadRouter);
+app.use('/api', statisticsRouter);
 
 // 错误处理中间件
 app.use((err, req, res, next) => {

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Statistics - XMUM Dorm</title>
+  <script src="./config.js"></script>
+  <script src="./auth.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f5f7fa;
+    }
+    .top-bar {
+      background-color: #007bff;
+      padding: 20px;
+      color: white;
+      font-size: 24px;
+      text-align: center;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .container {
+      max-width: 1200px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    .stat-card h3 {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .stat-card .number {
+      font-size: 36px;
+      font-weight: bold;
+      color: #1a5fb4;
+      margin-bottom: 5px;
+    }
+    .stat-card .subtitle {
+      font-size: 12px;
+      color: #999;
+    }
+    .section-title {
+      font-size: 20px;
+      color: #333;
+      margin: 30px 0 15px 0;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #1a5fb4;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #d9534f;
+    }
+    .trend-chart {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-top: 20px;
+    }
+    .trend-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .trend-item:last-child {
+      border-bottom: none;
+    }
+    .trend-date {
+      color: #666;
+    }
+    .trend-count {
+      font-weight: bold;
+      color: #1a5fb4;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">📊 Statistics Dashboard</div>
+  <div class="container" id="statsContainer">
+    <div class="loading">Loading statistics...</div>
+  </div>
+
+  <script>
+    const API_BASE = `${window.API_BASE_URL}/api`;
+
+    function ensureLogin() {
+      if (!window.auth || !window.auth.isLoggedIn()) {
+        alert('Please login first.');
+        window.location.href = 'log in.html';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadStatistics() {
+      if (!ensureLogin()) return;
+
+      const container = document.getElementById('statsContainer');
+      
+      try {
+        const token = window.auth.getToken();
+        const res = await fetch(`${API_BASE}/statistics`, {
+          method: 'GET',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: token ? `Bearer ${token}` : '' 
+          }
+        });
+        
+        const data = await res.json();
+        
+        if (data.status !== 0) {
+          container.innerHTML = `<div class="error">${data.message || 'Failed to load statistics'}</div>`;
+          return;
+        }
+        
+        const stats = data.data;
+        
+        container.innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <h3>Total Users</h3>
+              <div class="number">${stats.users.total}</div>
+              <div class="subtitle">+${stats.users.today} today</div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Posts</h3>
+              <div class="number">${stats.posts.total}</div>
+              <div class="subtitle">+${stats.posts.today} today</div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Comments</h3>
+              <div class="number">${stats.comments.total}</div>
+            </div>
+            <div class="stat-card">
+              <h3>Total Likes</h3>
+              <div class="number">${stats.likes.total}</div>
+            </div>
+            <div class="stat-card">
+              <h3>Page Views</h3>
+              <div class="number">${stats.views.total}</div>
+              <div class="subtitle">${stats.views.today} today</div>
+            </div>
+          </div>
+          
+          <h2 class="section-title">User Registration Trend (Last 7 Days)</h2>
+          <div class="trend-chart">
+            ${stats.userTrend && stats.userTrend.length > 0 
+              ? stats.userTrend.map(item => `
+                  <div class="trend-item">
+                    <span class="trend-date">${new Date(item.date).toLocaleDateString()}</span>
+                    <span class="trend-count">${item.count} users</span>
+                  </div>
+                `).join('')
+              : '<p style="text-align:center;color:#999;">No data available</p>'
+            }
+          </div>
+        `;
+      } catch (e) {
+        console.error(e);
+        container.innerHTML = '<div class="error">Network error. Please try again later.</div>';
+      }
+    }
+
+    // 记录当前页面访问
+    async function recordPageView() {
+      try {
+        await fetch(`${API_BASE}/statistics/view`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ page_path: '/statistics.html' })
+        });
+      } catch (e) {
+        // 静默失败，不影响用户体验
+        console.error('Failed to record page view:', e);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStatistics();
+      recordPageView();
+    });
+  </script>
+</body>
+</html>
+
