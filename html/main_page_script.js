@@ -17,8 +17,17 @@ document.addEventListener('DOMContentLoaded', function () {
     loadOfficialNotices();
     // 加载通知数量
     loadNotificationCount();
+    // 如果是管理员，显示统计链接
+    if (user.is_admin === 1 || user.is_admin === true) {
+      const statsLink = document.getElementById('statisticsLink');
+      if (statsLink) statsLink.style.display = 'inline-block';
+    }
+    // 记录页面访问
+    recordPageView('main page.html');
   } else {
     setFeedStatus('Please log in to view the feed.');
+    // 未登录用户也记录访问
+    recordPageView('main page.html');
   }
 
   // 头像点击显示下拉菜单
