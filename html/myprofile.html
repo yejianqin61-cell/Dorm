@@ -349,7 +349,7 @@
             <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;">
               <div style="font-size:13px;color:#666;">${new Date(p.created_at).toLocaleString()}</div>
               <div style="margin:8px 0;white-space:pre-wrap;">${p.content}</div>
-              ${p.image_url ? `<img src="${p.image_url.startsWith('/uploads') ? window.API_BASE_URL + p.image_url : p.image_url}" style="max-width:100%;border-radius:6px;">` : ''}
+              ${p.image_url ? `<img src="${p.image_url.startsWith('http://') || p.image_url.startsWith('https://') ? p.image_url : (p.image_url.startsWith('/uploads') ? window.API_BASE_URL + p.image_url : window.API_BASE_URL + '/uploads/' + p.image_url)}" style="max-width:100%;border-radius:6px;" onerror="this.style.display='none';">` : ''}
               <div style="margin-top:8px;display:flex;gap:10px;align-items:center;font-size:14px;color:#555;">
                 👍 ${p.like_count || 0} · 💬 ${p.comment_count || 0}
                 <button onclick="deleteMyPost(${p.id})" style="margin-left:auto;border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;">Delete</button>

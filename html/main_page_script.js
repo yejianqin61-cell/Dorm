@@ -95,14 +95,14 @@ function renderFeed(posts) {
     return `
       <div class="feature-card" data-post-id="${post.id}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <img src="${avatarSrc}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+          <img src="${avatarSrc}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:#e0e0e0;" onerror="this.src='default_avatar.png';">
           <div>
             <div style="font-weight:600;">${post.nickname || post.student_id || 'User'}</div>
             <div style="font-size:12px;color:#666;">${created}</div>
           </div>
         </div>
         <div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(post.content)}</div>
-        ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;object-fit:cover;margin-bottom:8px;">` : ''}
+        ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;object-fit:cover;margin-bottom:8px;" onerror="console.error('Image load failed:', this.src); this.style.display='none';" onload="console.log('Image loaded:', this.src);">` : ''}
         <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
           <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">👍 ${post.like_count || 0}</button>
           <span style="color:#666;font-size:14px;">💬 ${post.comment_count || 0}</span>
@@ -152,14 +152,35 @@ function escapeHtml(str = '') {
     .replace(/'/g, '&#039;');
 }
 
-// 规范化图片地址：如果是 /uploads 开头，则补上 API 基础 URL
+// 规范化图片地址：确保返回完整的可访问URL
 function normalizeImageUrl(url) {
   if (!url) return '';
-  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  
+  // 如果已经是完整URL，直接返回
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+  
+  // 获取基础URL
   const baseUrl = window.API_BASE_URL || 'http://127.0.0.1:4040';
-  if (url.startsWith('/api/uploads')) return `${baseUrl}${url.replace('/api', '')}`;
-  if (url.startsWith('/api/upload')) return `${baseUrl}${url.replace('/api', '')}`;
-  if (url.startsWith('/uploads')) return `${baseUrl}${url}`;
+  
+  // 处理各种相对路径格式
+  if (url.startsWith('/api/uploads') || url.startsWith('/api/upload')) {
+    // 移除 /api 前缀
+    return `${baseUrl}${url.replace('/api', '')}`;
+  }
+  
+  if (url.startsWith('/uploads')) {
+    // 直接拼接
+    return `${baseUrl}${url}`;
+  }
+  
+  // 如果是不以 / 开头的相对路径，也尝试拼接
+  if (!url.startsWith('/') && !url.startsWith('http')) {
+    return `${baseUrl}/uploads/${url}`;
+  }
+  
+  // 其他情况直接返回（可能是无效URL）
   return url;
 }
 
@@ -283,13 +304,8 @@ function showUserAvatar(userData) {
   if (feedAvatarContainer && feedAvatarImg) {
     // 规范化头像 URL
     let avatarSrc = userData.picture || 'default_avatar.png';
-    if (avatarSrc && !avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && avatarSrc !== 'default_avatar.png') {
-      const baseUrl = window.API_BASE_URL || 'http://127.0.0.1:4040';
-      if (avatarSrc.startsWith('/uploads')) {
-        avatarSrc = `${baseUrl}${avatarSrc}`;
-      } else if (avatarSrc.startsWith('/api/uploads') || avatarSrc.startsWith('/api/upload')) {
-        avatarSrc = `${baseUrl}${avatarSrc.replace('/api', '')}`;
-      }
+    if (avatarSrc && avatarSrc !== 'default_avatar.png') {
+      avatarSrc = normalizeImageUrl(avatarSrc);
     }
     
     feedAvatarImg.src = avatarSrc;
