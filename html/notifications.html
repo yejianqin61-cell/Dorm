@@ -90,7 +90,11 @@
         const token = window.auth.getToken();
         // 获取官方通知帖子
         const res = await fetch(`${API_BASE}/posts/official/notices`, {
-          headers: { Authorization: token ? `Bearer ${token}` : '' }
+          method: 'GET',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: token ? `Bearer ${token}` : '' 
+          }
         });
         const data = await res.json();
         

@@ -313,9 +313,16 @@ function showUserAvatar(userData) {
     let avatarSrc = userData.picture || 'default_avatar.png';
     if (avatarSrc && avatarSrc !== 'default_avatar.png') {
       avatarSrc = normalizeImageUrl(avatarSrc);
+    } else if (avatarSrc === 'default_avatar.png') {
+      // 使用默认头像
+      avatarSrc = 'default_avatar.png';
     }
     
     feedAvatarImg.src = avatarSrc;
+    feedAvatarImg.onerror = function() {
+      // 如果图片加载失败，使用默认头像
+      this.src = 'default_avatar.png';
+    };
     feedAvatarContainer.style.display = 'block';
   }
 }

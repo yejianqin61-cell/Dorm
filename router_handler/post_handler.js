@@ -192,3 +192,75 @@ exports.listComments = (req, res) => {
   });
 };
 
+// 获取官方通知帖子（用于弹窗显示）
+exports.getOfficialNotices = (req, res) => {
+  const userId = req.user.id;
+  
+  // 获取所有官方帖子
+  const sql = `
+    SELECT
+      p.id,
+      p.user_id,
+      p.content,
+      p.image_url,
+      p.created_at,
+      u.nickname,
+      u.student_id,
+      u.picture AS user_picture
+    FROM ev_posts p
+    LEFT JOIN ev_users u ON p.user_id = u.id
+    WHERE p.is_official = 1
+    ORDER BY p.created_at DESC
+    LIMIT 10;
+  `;
+  
+  db.query(sql, (err, posts) => {
+    if (err) return res.cc(err);
+    
+    // 如果没有官方帖子，直接返回空数组
+    if (posts.length === 0) {
+      return res.send({ status: 0, message: '获取官方通知成功', data: [] });
+    }
+    
+    // 检查用户已读的官方帖子
+    const postIds = posts.map(p => p.id);
+    if (postIds.length === 0) {
+      return res.send({ status: 0, message: '获取官方通知成功', data: posts });
+    }
+    
+    const placeholders = postIds.map(() => '?').join(',');
+    
+    db.query(
+      `SELECT notice_id FROM ev_user_read_notices WHERE user_id = ? AND notice_id IN (${placeholders}) AND notice_type = 'post_popup'`,
+      [userId, ...postIds],
+      (err2, readPosts) => {
+        if (err2) return res.cc(err2);
+        
+        const readPostIds = new Set(readPosts.map(r => r.notice_id));
+        // 过滤掉已读的帖子
+        const unreadPosts = posts.filter(p => !readPostIds.has(p.id));
+        
+        res.send({
+          status: 0,
+          message: '获取官方通知成功',
+          data: unreadPosts
+        });
+      }
+    );
+  });
+};
+
+// 标记官方帖子为已读
+exports.markOfficialNoticeRead = (req, res) => {
+  const userId = req.user.id;
+  const { post_id } = req.body;
+  
+  if (!post_id) return res.cc('缺少帖子ID');
+  
+  const sql = 'INSERT INTO ev_user_read_notices (user_id, notice_id, notice_type) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE created_at = CURRENT_TIMESTAMP';
+  db.query(sql, [userId, post_id, 'post_popup'], (err, results) => {
+    if (err) return res.cc(err);
+    res.send({ status: 0, message: '标记已读成功' });
+  });
+};
+
