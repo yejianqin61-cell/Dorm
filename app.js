@@ -13,6 +13,8 @@ setTimeout(() => {
         require('./db/set_admin.js');
         // 创建官方账号
         require('./db/create_official_account.js');
+        // 添加 is_official 字段
+        require('./db/add_is_official_field.js');
       } catch (err) {
         console.log('Admin/Official account setup skipped or failed:', err.message);
       }

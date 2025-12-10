@@ -40,6 +40,9 @@ CREATE TABLE IF NOT EXISTS ev_post_comments (
 -- 为现有表添加 is_admin 字段（如果不存在，会报错但可以忽略）
 -- 注意：如果字段已存在，ALTER TABLE 会报错，但不会影响其他操作
 
+-- 为 ev_posts 表添加 is_official 字段
+-- 注意：如果字段已存在，ALTER TABLE 会报错，但可以忽略
+
 -- 创建通知表
 CREATE TABLE IF NOT EXISTS ev_notifications (
   id INT PRIMARY KEY AUTO_INCREMENT,

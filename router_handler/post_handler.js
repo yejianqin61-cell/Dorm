@@ -10,9 +10,22 @@ exports.createPost = (req, res) => {
   const isOfficialAccount = userStudentId === 'XMUMDORM';
   const officialFlag = is_official || (isOfficialAccount ? 1 : 0);
   
-  const sql = 'insert into ev_posts (user_id, content, image_url, is_official) values (?, ?, ?, ?)';
+  // 先尝试使用 is_official 字段
+  let sql = 'insert into ev_posts (user_id, content, image_url, is_official) values (?, ?, ?, ?)';
   db.query(sql, [userId, content, image_url || null, officialFlag], (err, results) => {
-    if (err) return res.cc(err);
+    if (err) {
+      // 如果失败，可能是 is_official 字段不存在，尝试不使用该字段
+      if (err.code === 'ER_BAD_FIELD_ERROR' && err.message.includes('is_official')) {
+        console.log('is_official field does not exist, using fallback query');
+        sql = 'insert into ev_posts (user_id, content, image_url) values (?, ?, ?)';
+        return db.query(sql, [userId, content, image_url || null], (err2, results2) => {
+          if (err2) return res.cc(err2);
+          if (results2.affectedRows !== 1) return res.cc('发布失败，请稍后重试');
+          res.send({ status: 0, message: '发布成功' });
+        });
+      }
+      return res.cc(err);
+    }
     if (results.affectedRows !== 1) return res.cc('发布失败，请稍后重试');
     res.send({ status: 0, message: '发布成功' });
   });
@@ -23,6 +36,7 @@ exports.listPosts = (req, res) => {
   const pageSize = Number(req.query.limit) || 20;
   const offset = Number(req.query.offset) || 0;
 
+  // 先检查 is_official 字段是否存在，如果不存在则使用兼容查询
   const sql = `
     SELECT
       p.id,
@@ -37,13 +51,42 @@ exports.listPosts = (req, res) => {
       (SELECT COUNT(*) FROM ev_post_comments c WHERE c.post_id = p.id) AS comment_count
     FROM ev_posts p
     LEFT JOIN ev_users u ON p.user_id = u.id
-    WHERE p.is_official = 0
+    WHERE (p.is_official = 0 OR p.is_official IS NULL)
     ORDER BY p.created_at DESC
     LIMIT ? OFFSET ?;
   `;
 
   db.query(sql, [pageSize, offset], (err, posts) => {
-    if (err) return res.cc(err);
+    if (err) {
+      // 如果查询失败，可能是字段不存在，尝试不使用 is_official 的查询
+      console.error('Error in listPosts, trying fallback query:', err.message);
+      const fallbackSql = `
+        SELECT
+          p.id,
+          p.user_id,
+          p.content,
+          p.image_url,
+          p.created_at,
+          u.nickname,
+          u.student_id,
+          u.picture AS user_picture,
+          (SELECT COUNT(*) FROM ev_post_likes l WHERE l.post_id = p.id) AS like_count,
+          (SELECT COUNT(*) FROM ev_post_comments c WHERE c.post_id = p.id) AS comment_count
+        FROM ev_posts p
+        LEFT JOIN ev_users u ON p.user_id = u.id
+        WHERE u.student_id != 'XMUMDORM' OR u.student_id IS NULL
+        ORDER BY p.created_at DESC
+        LIMIT ? OFFSET ?;
+      `;
+      return db.query(fallbackSql, [pageSize, offset], (err2, posts2) => {
+        if (err2) return res.cc(err2);
+        res.send({
+          status: 0,
+          message: '获取动态成功',
+          data: posts2
+        });
+      });
+    }
     res.send({
       status: 0,
       message: '获取动态成功',
