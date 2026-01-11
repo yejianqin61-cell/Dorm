@@ -16,6 +16,15 @@ window.API_BASE_URL = window.API_BASE_URL ||
   (typeof process !== 'undefined' && process.env && process.env.VITE_API_URL) || 
   defaultApiUrl;
 
+// 调试：在控制台输出 API 地址
+if (typeof console !== 'undefined') {
+  console.log('🔧 API 配置:', {
+    hostname: typeof window !== 'undefined' ? window.location.hostname : 'N/A',
+    apiBaseUrl: window.API_BASE_URL,
+    envVar: typeof process !== 'undefined' && process.env ? process.env.VITE_API_URL : 'N/A'
+  });
+}
+
 // 在 Vercel 中，环境变量会通过构建时注入
 // 本地开发时使用默认值
 

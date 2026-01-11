@@ -364,6 +364,13 @@
   <script>
     // ====== 配置后端 API ======
     const LOGIN_API_URL = `${window.API_BASE_URL}/api/login`;
+    
+    // 调试：显示当前 API 地址
+    console.log('🔧 当前 API 配置:', {
+      API_BASE_URL: window.API_BASE_URL,
+      LOGIN_API_URL: LOGIN_API_URL,
+      hostname: window.location.hostname
+    });
 
     // ====== DOM ======
     const loginForm = document.getElementById('loginForm');
@@ -428,6 +435,9 @@
 
       // 4. 发请求
       try {
+        console.log('🔗 正在连接到:', LOGIN_API_URL);
+        console.log('📤 发送数据:', { student_id: schoolIdInput.value.trim() });
+        
         const res = await fetch(LOGIN_API_URL, {
           method: "POST",
           headers: {
@@ -439,7 +449,9 @@
           })
         });
 
+        console.log('📥 响应状态:', res.status, res.statusText);
         const data = await res.json();
+        console.log('📥 响应数据:', data);
 
         if (!res.ok || data.status !== 0) {
           showMessage("error", data.message || "Login failed");
@@ -463,8 +475,14 @@
         }
 
       } catch (err) {
-        console.log(err);
-        showMessage("error", "Network error");
+        console.error('❌ 登录错误:', err);
+        console.error('❌ 错误详情:', {
+          name: err.name,
+          message: err.message,
+          stack: err.stack,
+          apiUrl: LOGIN_API_URL
+        });
+        showMessage("error", `网络错误: ${err.message || '无法连接到服务器，请检查后端服务是否运行'}`);
       }
 
       // 5. 恢复按钮状态
