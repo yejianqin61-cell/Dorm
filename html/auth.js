@@ -27,7 +27,12 @@ class AuthManager {
   }
 
   getToken() {
-    return this.token;
+    // 如果 token 为空，返回空字符串
+    if (!this.token) return '';
+    // 如果 token 已经包含 "Bearer " 前缀，直接返回
+    if (this.token.startsWith('Bearer ')) return this.token;
+    // 否则添加 "Bearer " 前缀
+    return 'Bearer ' + this.token;
   }
 
   setSession(token, userData) {
