@@ -38,7 +38,17 @@ const uploadRouter = require('./router/upload.js');
 
 // token 认证，仅放行注册、登录等公开接口
 app.use(
-  expressJWT({ secret: config.jwtSecretKey, algorithms: ['HS256'] }).unless({
+  expressJWT({ 
+    secret: config.jwtSecretKey, 
+    algorithms: ['HS256'],
+    // 从 Authorization header 中获取 token
+    getToken: (req) => {
+      if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        return req.headers.authorization.split(' ')[1];
+      }
+      return null;
+    }
+  }).unless({
     path: [
       /^\/api\/reguser$/,
       /^\/api\/login$/,
