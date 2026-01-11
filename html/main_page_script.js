@@ -13,35 +13,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const user = auth.getUser();
     showUserAvatar(user);
     loadFeed();
-    // 加载官方通知弹窗
-    loadOfficialNotices();
-    // 加载通知数量
-    loadNotificationCount();
-    // 如果是管理员，显示统计链接
-    if (user.is_admin === 1 || user.is_admin === true) {
-      const statsLink = document.getElementById('statisticsLink');
-      if (statsLink) statsLink.style.display = 'inline-block';
-    }
-    // 记录页面访问
-    recordPageView('main page.html');
   } else {
     setFeedStatus('Please log in to view the feed.');
-    // 未登录用户也记录访问
-    recordPageView('main page.html');
   }
-
-  // 头像点击显示下拉菜单
-  document.getElementById('userAvatarNav')?.addEventListener('click', function (e) {
-    e.stopPropagation();
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) dropdown.classList.toggle('show');
-  });
-
-  // 点击其他地方关闭下拉菜单
-  document.addEventListener('click', function () {
-    const dropdown = document.getElementById('userDropdown');
-    if (dropdown) dropdown.classList.remove('show');
-  });
 
   // 登出功能
   document.getElementById('logoutBtn')?.addEventListener('click', function (e) {
@@ -69,10 +43,9 @@ async function loadFeed() {
 
   setFeedStatus('Loading...');
   try {
-    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts`, {
       headers: {
-        Authorization: token ? `Bearer ${token}` : ''
+        Authorization: window.auth?.getToken() || ''
       }
     });
     const data = await res.json();
@@ -101,33 +74,30 @@ function renderFeed(posts) {
   feedList.innerHTML = posts.map(post => {
     const created = new Date(post.created_at).toLocaleString();
     const imgSrc = normalizeImageUrl(post.image_url);
-    const currentUser = window.auth?.getUser();
-    const isMine = currentUser?.id === post.user_id;
-    const isAdmin = currentUser?.is_admin === 1 || currentUser?.is_admin === true;
-    const canDelete = isMine || isAdmin; // 作者或管理员可以删除
+    const isMine = window.auth?.getUser()?.id === post.user_id;
     const expanded = expandedSet.has(post.id);
     const comments = commentsCache[post.id] || [];
     const avatarSrc = normalizeImageUrl(post.user_picture) || 'default_avatar.png';
     return `
       <div class="feature-card" data-post-id="${post.id}">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <img src="${avatarSrc}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:#e0e0e0;" onerror="this.src='default_avatar.png';">
+          <img src="${avatarSrc}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
           <div>
             <div style="font-weight:600;">${post.nickname || post.student_id || 'User'}</div>
             <div style="font-size:12px;color:#666;">${created}</div>
           </div>
         </div>
         <div style="margin-bottom:8px;white-space:pre-wrap;">${escapeHtml(post.content)}</div>
-        ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;object-fit:cover;margin-bottom:8px;" onerror="console.error('Image load failed:', this.src); this.style.display='none';" onload="console.log('Image loaded:', this.src);">` : ''}
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-          <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">👍 ${post.like_count || 0}</button>
+        ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;object-fit:cover;margin-bottom:8px;">` : ''}
+        <div style="display:flex;gap:12px;align-items:center;">
+          <button class="like-btn" data-id="${post.id}" style="border:none;background:#e7f0fb;color:#1a5fb4;padding:8px 12px;border-radius:6px;cursor:pointer;">👍 ${post.like_count || 0}</button>
           <span style="color:#666;font-size:14px;">💬 ${post.comment_count || 0}</span>
-          <button class="comment-toggle-btn" data-id="${post.id}" style="border:none;background:#f0f4f9;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;">${expanded ? 'Hide' : 'Show'} comments</button>
-          ${canDelete ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:${isAdmin && !isMine ? '#fff3cd' : '#fbeaea'};color:${isAdmin && !isMine ? '#856404' : '#d9534f'};padding:6px 10px;border-radius:6px;cursor:pointer;font-size:14px;" title="${isAdmin && !isMine ? '管理员删除' : '删除'}">${isAdmin && !isMine ? '🗑️ Admin Delete' : 'Delete'}</button>` : ''}
+          <button class="comment-toggle-btn" data-id="${post.id}" style="border:none;background:#f0f4f9;color:#1a5fb4;padding:6px 10px;border-radius:6px;cursor:pointer;">${expanded ? 'Hide' : 'Show'} comments</button>
+          ${isMine ? `<button class="delete-btn" data-id="${post.id}" style="border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;">Delete</button>` : ''}
         </div>
-        <div style="margin-top:8px;display:flex;gap:6px;">
-          <input type="text" placeholder="Add a comment" class="comment-input" style="flex:1;padding:6px 8px;border:1px solid #d9d9d9;border-radius:6px;font-size:14px;">
-          <button class="comment-btn" data-id="${post.id}" style="border:none;background:#1a5fb4;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:14px;white-space:nowrap;">Send</button>
+        <div style="margin-top:8px;display:flex;gap:8px;">
+          <input type="text" placeholder="Add a comment" class="comment-input" style="flex:1;padding:8px;border:1px solid #d9d9d9;border-radius:6px;">
+          <button class="comment-btn" data-id="${post.id}" style="border:none;background:#1a5fb4;color:#fff;padding:8px 12px;border-radius:6px;cursor:pointer;">Send</button>
         </div>
         ${expanded ? renderComments(comments) : ''}
       </div>
@@ -168,35 +138,14 @@ function escapeHtml(str = '') {
     .replace(/'/g, '&#039;');
 }
 
-// 规范化图片地址：确保返回完整的可访问URL
+// 规范化图片地址：如果是 /uploads 开头，则补上 API 基础 URL
 function normalizeImageUrl(url) {
   if (!url) return '';
-  
-  // 如果已经是完整URL，直接返回
-  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  }
-  
-  // 获取基础URL
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
   const baseUrl = window.API_BASE_URL || 'http://127.0.0.1:4040';
-  
-  // 处理各种相对路径格式
-  if (url.startsWith('/api/uploads') || url.startsWith('/api/upload')) {
-    // 移除 /api 前缀
-    return `${baseUrl}${url.replace('/api', '')}`;
-  }
-  
-  if (url.startsWith('/uploads')) {
-    // 直接拼接
-    return `${baseUrl}${url}`;
-  }
-  
-  // 如果是不以 / 开头的相对路径，也尝试拼接
-  if (!url.startsWith('/') && !url.startsWith('http')) {
-    return `${baseUrl}/uploads/${url}`;
-  }
-  
-  // 其他情况直接返回（可能是无效URL）
+  if (url.startsWith('/api/uploads')) return `${baseUrl}${url.replace('/api', '')}`;
+  if (url.startsWith('/api/upload')) return `${baseUrl}${url.replace('/api', '')}`;
+  if (url.startsWith('/uploads')) return `${baseUrl}${url}`;
   return url;
 }
 
@@ -220,11 +169,10 @@ function renderComments(list) {
 
 async function toggleLike(postId, btn) {
   try {
-    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/like`, {
       method: 'POST',
       headers: {
-        Authorization: token ? `Bearer ${token}` : ''
+        Authorization: window.auth?.getToken() || ''
       }
     });
     const data = await res.json();
@@ -244,12 +192,11 @@ async function sendComment(postId, input) {
   const content = input?.value.trim();
   if (!content) return;
   try {
-    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/comment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : ''
+        Authorization: window.auth?.getToken() || ''
       },
       body: JSON.stringify({ content })
     });
@@ -274,9 +221,8 @@ async function toggleComments(postId, forceRefresh = false) {
     return;
   }
   try {
-    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}/comment`, {
-      headers: { Authorization: token ? `Bearer ${token}` : '' }
+      headers: { Authorization: window.auth?.getToken() || '' }
     });
     const data = await res.json();
     if (data.status === 0) {
@@ -295,10 +241,9 @@ async function toggleComments(postId, forceRefresh = false) {
 async function deletePost(postId) {
   if (!confirm('Delete this post?')) return;
   try {
-    const token = window.auth?.getToken();
     const res = await fetch(`${window.API_BASE_URL}/api/posts/${postId}`, {
       method: 'DELETE',
-      headers: { Authorization: token ? `Bearer ${token}` : '' }
+      headers: { Authorization: window.auth?.getToken() || '' }
     });
     const data = await res.json();
     if (data.status === 0) {
@@ -320,18 +265,16 @@ function showUserAvatar(userData) {
   if (feedAvatarContainer && feedAvatarImg) {
     // 规范化头像 URL
     let avatarSrc = userData.picture || 'default_avatar.png';
-    if (avatarSrc && avatarSrc !== 'default_avatar.png') {
-      avatarSrc = normalizeImageUrl(avatarSrc);
-    } else if (avatarSrc === 'default_avatar.png') {
-      // 使用默认头像
-      avatarSrc = 'default_avatar.png';
+    if (avatarSrc && !avatarSrc.startsWith('http://') && !avatarSrc.startsWith('https://') && avatarSrc !== 'default_avatar.png') {
+      const baseUrl = window.API_BASE_URL || 'http://127.0.0.1:4040';
+      if (avatarSrc.startsWith('/uploads')) {
+        avatarSrc = `${baseUrl}${avatarSrc}`;
+      } else if (avatarSrc.startsWith('/api/uploads') || avatarSrc.startsWith('/api/upload')) {
+        avatarSrc = `${baseUrl}${avatarSrc.replace('/api', '')}`;
+      }
     }
     
     feedAvatarImg.src = avatarSrc;
-    feedAvatarImg.onerror = function() {
-      // 如果图片加载失败，使用默认头像
-      this.src = 'default_avatar.png';
-    };
     feedAvatarContainer.style.display = 'block';
   }
 }
@@ -341,153 +284,4 @@ function clearLoginData() {
   localStorage.removeItem('userToken');
   localStorage.removeItem('userData');
   window.location.href = 'log in.html';
-}
-
-// 加载官方通知弹窗
-async function loadOfficialNotices() {
-  if (!window.auth || !window.auth.isLoggedIn()) return;
-  
-  try {
-    const token = window.auth.getToken();
-    const res = await fetch(`${window.API_BASE_URL}/api/posts/official/notices`, {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : '' 
-      }
-    });
-    
-    if (!res.ok) {
-      console.error('Failed to fetch official notices:', res.status, res.statusText);
-      return;
-    }
-    
-    const data = await res.json();
-    
-    if (data.status === 0 && data.data && data.data.length > 0) {
-      // 显示第一个未读的官方通知
-      showOfficialNoticePopup(data.data[0]);
-    }
-  } catch (e) {
-    console.error('Error loading official notices:', e);
-  }
-}
-
-// 显示官方通知弹窗
-function showOfficialNoticePopup(post) {
-  const popup = document.createElement('div');
-  popup.id = 'officialNoticePopup';
-  popup.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    padding: 30px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow-y: auto;
-    z-index: 10000;
-  `;
-  
-  const imgSrc = normalizeImageUrl(post.image_url);
-  
-  popup.innerHTML = `
-    <div style="text-align:center;margin-bottom:20px;">
-      <h2 style="color:#1a5fb4;margin-bottom:10px;">📢 Official Notice</h2>
-      <div style="font-size:14px;color:#666;">From: ${post.nickname || post.student_id || 'XMUM Dorm'}</div>
-    </div>
-    <div style="margin-bottom:20px;white-space:pre-wrap;line-height:1.6;">${escapeHtml(post.content)}</div>
-    ${imgSrc ? `<img src="${imgSrc}" style="width:100%;border-radius:8px;margin-bottom:20px;" onerror="this.style.display='none';">` : ''}
-    <div style="text-align:center;">
-      <button id="confirmNoticeBtn" style="background:#1a5fb4;color:white;border:none;padding:12px 30px;border-radius:8px;cursor:pointer;font-size:16px;font-weight:600;">Got it</button>
-    </div>
-  `;
-  
-  document.body.appendChild(popup);
-  
-  // 添加遮罩层
-  const overlay = document.createElement('div');
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 9999;
-  `;
-  document.body.insertBefore(overlay, popup);
-  
-  // 确认按钮事件
-  document.getElementById('confirmNoticeBtn').addEventListener('click', async () => {
-    // 标记为已读
-    try {
-      const token = window.auth.getToken();
-      await fetch(`${window.API_BASE_URL}/api/posts/official/read`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: token ? `Bearer ${token}` : ''
-        },
-        body: JSON.stringify({ post_id: post.id })
-      });
-    } catch (e) {
-      console.error('Error marking notice as read:', e);
-    }
-    
-    // 移除弹窗和遮罩
-    popup.remove();
-    overlay.remove();
-  });
-}
-
-// 加载通知数量
-async function loadNotificationCount() {
-  if (!window.auth || !window.auth.isLoggedIn()) return;
-  
-  try {
-    const token = window.auth.getToken();
-    const res = await fetch(`${window.API_BASE_URL}/api/posts/official/notices`, {
-      method: 'GET',
-      headers: { 
-        'Content-Type': 'application/json',
-        Authorization: token ? `Bearer ${token}` : '' 
-      }
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      const badge = document.getElementById('notificationBadge');
-      if (badge && data.status === 0 && data.data && data.data.length > 0) {
-        badge.textContent = data.data.length;
-        badge.style.display = 'block';
-      } else if (badge) {
-        badge.style.display = 'none';
-      }
-    }
-  } catch (e) {
-    console.error('Error loading notification count:', e);
-  }
-}
-
-// 记录页面访问
-async function recordPageView(pagePath) {
-  try {
-    const userId = window.auth?.getUser()?.id || null;
-    await fetch(`${window.API_BASE_URL}/api/statistics/view`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        page_path: pagePath || window.location.pathname,
-        user_id: userId
-      })
-    });
-  } catch (e) {
-    // 静默失败，不影响用户体验
-    console.error('Failed to record page view:', e);
-  }
 }

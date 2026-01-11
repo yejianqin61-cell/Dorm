@@ -3,27 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const app = express();
 
-// 初始化数据库表（启动时自动执行）
-setTimeout(() => {
-  try {
-    require('./db/init.js');
-    // 延迟执行管理员设置，确保表已创建
-    setTimeout(() => {
-      try {
-        require('./db/set_admin.js');
-        // 创建官方账号
-        require('./db/create_official_account.js');
-        // 添加 is_official 字段
-        require('./db/add_is_official_field.js');
-      } catch (err) {
-        console.log('Admin/Official account setup skipped or failed:', err.message);
-      }
-    }, 5000); // 在数据库初始化后5秒执行
-  } catch (err) {
-    console.log('Database init skipped or failed:', err.message);
-  }
-}, 2000); // 延迟2秒执行，确保数据库连接已建立
-
 const joi = require('joi');
 
 // res.cc 定义必须放在前面
@@ -43,9 +22,6 @@ app.use(cors());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// 获取真实IP地址（用于统计）
-app.set('trust proxy', true);
-
 // 静态访问上传文件（必须在 JWT 之前，否则会被拦截）
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
@@ -59,7 +35,6 @@ const userRouter = require('./router/user.js');
 const userinfoRouter = require('./router/userinfo.js');
 const postRouter = require('./router/post.js');
 const uploadRouter = require('./router/upload.js');
-const statisticsRouter = require('./router/statistics.js');
 
 // token 认证，仅放行注册、登录等公开接口
 app.use(
@@ -67,7 +42,6 @@ app.use(
     path: [
       /^\/api\/reguser$/,
       /^\/api\/login$/,
-      /^\/api\/statistics\/view$/,  // 允许记录页面访问
       /^\/uploads\//  // 排除静态文件路径
     ]
   })
@@ -78,7 +52,6 @@ app.use('/api', userRouter);
 app.use('/api', userinfoRouter);
 app.use('/api', postRouter);
 app.use('/api', uploadRouter);
-app.use('/api', statisticsRouter);
 
 // 错误处理中间件
 app.use((err, req, res, next) => {

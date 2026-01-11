@@ -5,8 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My Profile - XMUM Dorm</title>
-  <link rel="icon" type="image/jpeg" href="favicon.jpg">
-  <link rel="shortcut icon" href="favicon.jpg">
   <script src="./config.js"></script>
   <script src="./auth.js"></script>
 
@@ -127,75 +125,6 @@
       font-size: 20px;
       color: #555;
     }
-
-    /* 移动端响应式 */
-    @media (max-width: 768px) {
-      .top-bar {
-        padding: 15px;
-        font-size: 18px;
-      }
-
-      .profile-container {
-        width: 95%;
-        margin: 15px auto;
-        padding: 20px 15px;
-      }
-
-      .profile-header h2 {
-        font-size: 20px;
-      }
-
-      .profile-avatar img {
-        width: 80px;
-        height: 80px;
-        border-width: 3px;
-      }
-
-      .profile-info p {
-        font-size: 16px;
-        margin: 10px 0;
-      }
-
-      .form-group {
-        margin-top: 12px;
-      }
-
-      .form-group input {
-        padding: 8px;
-        font-size: 14px;
-      }
-
-      .actions {
-        flex-direction: column;
-        gap: 10px;
-      }
-
-      .btn {
-        width: 100%;
-        padding: 10px;
-        font-size: 14px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .top-bar {
-        font-size: 16px;
-        padding: 12px;
-      }
-
-      .profile-container {
-        padding: 15px 10px;
-      }
-
-      .profile-avatar img {
-        width: 70px;
-        height: 70px;
-      }
-
-      .profile-header h2 {
-        font-size: 18px;
-      }
-    }
   </style>
 </head>
 
@@ -228,7 +157,7 @@
       const token = window.auth.getToken();
       const res = await fetch(`${API_BASE}/userinfo`, {
         method: 'GET',
-        headers: { Authorization: token ? `Bearer ${token}` : '' }
+        headers: { Authorization: token }
       });
       const data = await res.json();
       const container = document.getElementById('profile');
@@ -290,7 +219,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: window.auth.getToken() ? `Bearer ${window.auth.getToken()}` : ''
+          Authorization: window.auth.getToken()
         },
         body: JSON.stringify({ nickname, email })
       });
@@ -309,7 +238,7 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: window.auth.getToken() ? `Bearer ${window.auth.getToken()}` : ''
+          Authorization: window.auth.getToken()
         },
         body: JSON.stringify({ avatar })
       });
@@ -331,9 +260,8 @@
       const container = document.getElementById('myPosts');
       container.innerHTML = '<div class="loading">Loading my posts...</div>';
       try {
-        const token = window.auth.getToken();
         const res = await fetch(`${API_BASE}/posts/mine`, {
-          headers: { Authorization: token ? `Bearer ${token}` : '' }
+          headers: { Authorization: window.auth.getToken() }
         });
         const data = await res.json();
         if (data.status !== 0) {
@@ -351,7 +279,7 @@
             <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;">
               <div style="font-size:13px;color:#666;">${new Date(p.created_at).toLocaleString()}</div>
               <div style="margin:8px 0;white-space:pre-wrap;">${p.content}</div>
-              ${p.image_url ? `<img src="${p.image_url.startsWith('http://') || p.image_url.startsWith('https://') ? p.image_url : (p.image_url.startsWith('/uploads') ? window.API_BASE_URL + p.image_url : window.API_BASE_URL + '/uploads/' + p.image_url)}" style="max-width:100%;border-radius:6px;" onerror="this.style.display='none';">` : ''}
+              ${p.image_url ? `<img src="${p.image_url.startsWith('/uploads') ? window.API_BASE_URL + p.image_url : p.image_url}" style="max-width:100%;border-radius:6px;">` : ''}
               <div style="margin-top:8px;display:flex;gap:10px;align-items:center;font-size:14px;color:#555;">
                 👍 ${p.like_count || 0} · 💬 ${p.comment_count || 0}
                 <button onclick="deleteMyPost(${p.id})" style="margin-left:auto;border:none;background:#fbeaea;color:#d9534f;padding:6px 10px;border-radius:6px;cursor:pointer;">Delete</button>
@@ -368,10 +296,9 @@
     async function deleteMyPost(id) {
       if (!confirm('Delete this post?')) return;
       try {
-        const token = window.auth.getToken();
         const res = await fetch(`${API_BASE}/posts/${id}`, {
           method: 'DELETE',
-          headers: { Authorization: token ? `Bearer ${token}` : '' }
+          headers: { Authorization: window.auth.getToken() }
         });
         const data = await res.json();
         if (data.status === 0) {
@@ -399,10 +326,9 @@
     if (!avatarFileInput.files || !avatarFileInput.files.length) return;
     const file = avatarFileInput.files[0];
     const avatarInput = document.getElementById('avatarInput');
-    const token = window.auth.getToken();
     const res = await fetch(`${API_BASE}/upload`, {
       method: 'POST',
-      headers: { Authorization: token ? `Bearer ${token}` : '' },
+      headers: { Authorization: window.auth.getToken() },
       body: (() => {
         const fd = new FormData();
         fd.append('file', file);
@@ -411,7 +337,10 @@
     });
     const data = await res.json();
     if (data.status === 0 && data.data?.url) {
-      const fullUrl = `${window.API_BASE_URL}${data.data.url}`;
+      // 如果 URL 已经是完整 URL（Cloudinary），直接使用；否则拼接 API_BASE_URL
+      const fullUrl = data.data.url.startsWith('http://') || data.data.url.startsWith('https://')
+        ? data.data.url
+        : `${window.API_BASE_URL}${data.data.url}`;
       avatarInput.value = fullUrl;
       // 自动提交更新头像
       await updateAvatar();

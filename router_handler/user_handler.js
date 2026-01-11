@@ -44,7 +44,7 @@ exports.regUser = (req, res) => {
 exports.login = (req, res) => {
   const userinfo = req.body;
 
-  const sql = 'select id, student_id, email, password, nickname, picture, is_admin from ev_users where student_id=?';
+  const sql = 'select id, student_id, email, password, nickname, picture from ev_users where student_id=?';
 
   db.query(sql, userinfo.student_id, (err, results) => {
     if (err) return res.cc(err);
@@ -59,7 +59,7 @@ exports.login = (req, res) => {
         return res.send({
           status: 0,
           message: '登录成功！（演示账号）',
-          token: tokenStr,
+          token: 'Bearer ' + tokenStr,
           data: {
             id: -1,
             student_id: demoId,
@@ -77,8 +77,7 @@ exports.login = (req, res) => {
 
     const user = {
       id: results[0].id,
-      student_id: results[0].student_id,
-      is_admin: results[0].is_admin || 0
+      student_id: results[0].student_id
     };
 
     const tokenStr = jwt.sign(user, config.jwtSecretKey, { expiresIn: config.expiresIn });
@@ -86,14 +85,13 @@ exports.login = (req, res) => {
     res.send({
       status: 0,
       message: '登录成功！',
-      token: tokenStr,
+      token: 'Bearer ' + tokenStr,
       data: {
         id: results[0].id,
         student_id: results[0].student_id,
         email: results[0].email,
         nickname: results[0].nickname,
-        picture: results[0].picture,
-        is_admin: results[0].is_admin || 0
+        picture: results[0].picture
       }
     });
   });
